@@ -56,6 +56,7 @@ CREATE TABLE equipment (
     current_condition equipment_condition,
     location_id INT REFERENCES locations(id) ON DELETE SET NULL,
     photo_url VARCHAR(255),
+    is_assigned BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
