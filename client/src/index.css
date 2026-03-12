@@ -1,15 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-
 :root {
-  --bg-color: #fcfcfc;
+  --bg-color: #DFE8E6;
   --text-color: #1a1a1a;
   --border-color: #ddd;
-  --accent-color: #000;
+  --accent-color: #A0430A;
 }
 
 body {
   margin: 0;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Clash Grotesk', sans-serif;
   background-color: var(--bg-color);
   color: var(--text-color);
   line-height: 1.6;
