@@ -1,10 +1,11 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState, useCallback } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Environment, Text, RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
 
-function Laptop({ isTyping, activeInputValue, activeInputType, activeFieldIndex }) {
+function Laptop({ isTyping, activeInputValue, activeInputType, activeFieldIndex, onReady }) {
   const hingeRef = useRef()
+  const readyFired = useRef(false)
   const textGroupRef = useRef()
   const prevFieldRef = useRef(activeFieldIndex)
   const swipeOffset = useRef(0)
@@ -30,6 +31,11 @@ function Laptop({ isTyping, activeInputValue, activeInputType, activeFieldIndex 
     swipeOffset.current = THREE.MathUtils.lerp(swipeOffset.current, 0, delta * 8)
     if (textGroupRef.current) {
       textGroupRef.current.position.y = swipeOffset.current
+    }
+
+    if (!readyFired.current) {
+      readyFired.current = true
+      onReady?.()
     }
   })
 
@@ -141,15 +147,33 @@ function Laptop({ isTyping, activeInputValue, activeInputType, activeFieldIndex 
 }
 
 export default function LaptopModel({ isTyping, activeInputValue, activeInputType, activeFieldIndex }) {
+  const wrapperRef = useRef(null)
+  const [modelReady, setModelReady] = useState(false)
+
+  const handleReady = useCallback(() => setModelReady(true), [])
+
+  useEffect(() => {
+    if (!modelReady || !wrapperRef.current) return
+    import('gsap').then(({ gsap }) => {
+      gsap.fromTo(wrapperRef.current,
+        { x: '-100%', opacity: 0 },
+        { x: '0%', opacity: 1, duration: 1.2, ease: 'power3.out' }
+      )
+    })
+  }, [modelReady])
+
   return (
-    <div style={{ position: 'absolute', top: '60%', left: '50%', transform: 'translate(-50%, -50%)', width: '100%', height: '100%', zIndex: 1, pointerEvents: 'none' }}>
+    <div
+      ref={wrapperRef}
+      style={{ position: 'absolute', top: '60%', left: '50%', transform: 'translate(-50%, -50%)', width: '100%', height: '100%', zIndex: 1, pointerEvents: 'none', opacity: 0 }}
+    >
       <Canvas camera={{ position: [0, 2.0, 6.5], fov: 45 }}>
         <ambientLight intensity={0.6} />
         <directionalLight position={[5, 10, 5]} intensity={1.5} />
         <Environment preset="city" />
         
         <group rotation={[0.2, 0.8, 0]}>
-          <Laptop isTyping={isTyping} activeInputValue={activeInputValue} activeInputType={activeInputType} activeFieldIndex={activeFieldIndex} />
+          <Laptop isTyping={isTyping} activeInputValue={activeInputValue} activeInputType={activeInputType} activeFieldIndex={activeFieldIndex} onReady={handleReady} />
         </group>
       </Canvas>
     </div>
