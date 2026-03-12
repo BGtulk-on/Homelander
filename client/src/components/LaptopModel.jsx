@@ -165,7 +165,7 @@ export default function LaptopModel({ isTyping, activeInputValue, activeInputTyp
   return (
     <div
       ref={wrapperRef}
-      style={{ position: 'absolute', top: '60%', left: '50%', transform: 'translate(-50%, -50%)', width: '100%', height: '100%', zIndex: 1, pointerEvents: 'none', opacity: 0 }}
+      style={{ position: 'relative', width: '500px', height: '500px', zIndex: 1, pointerEvents: 'none', opacity: 0 }}
     >
       <Canvas camera={{ position: [0, 2.0, 6.5], fov: 45 }}>
         <ambientLight intensity={0.6} />

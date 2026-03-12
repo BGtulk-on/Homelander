@@ -1,17 +1,19 @@
 .gate-wrapper {
   display: flex;
-  min-height: 70vh;
+  width: 100%;
+  min-height: 100vh;
   align-items: center;
+  justify-content: center;
 }
 
 .gate-blank-section {
   flex: 1;
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: center;
-  height: 400px;
-  width: 400px;
+  height: 100%;
   position: relative;
+  padding-right: 5rem;
 }
 
 .gate-empty-label {
@@ -22,21 +24,16 @@
   text-transform: uppercase;
 }
 
-.gate-divider {
-  width: 2px;
-  background-color: var(--accent-color);
-  align-self: stretch;
-  position: relative;
-  z-index: 10;
-}
 
 .gate-form-section {
   flex: 1;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
+  height: 100%;
   position: relative;
   z-index: 10;
+  padding-left: 5rem;
 }
 
 .gate-form-content {
@@ -44,6 +41,7 @@
   max-width: 320px;
   display: flex;
   flex-direction: column;
+  padding-left: 6rem;
 }
 
 .gate-title {

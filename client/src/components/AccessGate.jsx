@@ -1,13 +1,41 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import LaptopModel from './LaptopModel'
+import gsap from 'gsap'
 import './AccessGate.css'
 
-export default function AccessGate() {
+export default function AccessGate({ onLogin, isExiting }) {
   const [wantsExistingAccess, setWantsExistingAccess] = useState(true)
   const [isTyping, setIsTyping] = useState(false)
   const [activeInputType, setActiveInputType] = useState('text')
   const [activeInputValue, setActiveInputValue] = useState('')
   const [activeFieldIndex, setActiveFieldIndex] = useState(0)
+  
+  const leftSectionRef = useRef(null)
+  const rightSectionRef = useRef(null)
+
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: ''
+  })
+
+  useEffect(() => {
+    if (isExiting) {
+      gsap.to(leftSectionRef.current, {
+        x: '-100%',
+        opacity: 0,
+        duration: 0.8,
+        ease: 'power3.in'
+      })
+      gsap.to(rightSectionRef.current, {
+        x: '100%',
+        opacity: 0,
+        duration: 0.8,
+        ease: 'power3.in'
+      })
+    }
+  }, [isExiting])
 
   const toggleAccessMode = () => {
     setWantsExistingAccess(!wantsExistingAccess)
@@ -16,6 +44,16 @@ export default function AccessGate() {
 
   const handleSubmission = (e) => {
     e.preventDefault()
+    
+    if (wantsExistingAccess) {
+      if (formData.email === 'user@test.com' && formData.password === 'testpass') {
+        onLogin('user')
+      } else if (formData.email === 'admin@test.com' && formData.password === 'adminpass') {
+        onLogin('admin')
+      } else {
+        alert('Invalid credentials')
+      }
+    }
   }
 
   const handleFocus = (e) => {
@@ -38,27 +76,65 @@ export default function AccessGate() {
   }
 
   const handleChange = (e) => {
-    setActiveInputValue(e.target.value)
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+    setActiveInputValue(value)
   }
 
   return (
     <div className="gate-wrapper">
-      <div className="gate-blank-section">
-        <LaptopModel isTyping={isTyping} activeInputValue={activeInputValue} activeInputType={activeInputType} activeFieldIndex={activeFieldIndex} />
+      <div className="gate-blank-section" ref={leftSectionRef}>
+        <LaptopModel 
+          isTyping={isTyping} 
+          activeInputValue={activeInputValue} 
+          activeInputType={activeInputType} 
+          activeFieldIndex={activeFieldIndex} 
+        />
       </div>
-      <div className="gate-divider"></div>
-      <div className="gate-form-section">
+      
+      <div className="gate-form-section" ref={rightSectionRef}>
         <div className="gate-form-content" onFocus={handleFocus} onBlur={handleBlur} onChange={handleChange}>
           <h2 className="gate-title">{wantsExistingAccess ? 'LOGIN' : 'REGISTER'}</h2>
           
-          <form className="gate-form" onSubmit={handleSubmission}>
-            <input type="text" placeholder="USERNAME" maxLength={50} />
-            
+          <form className="gate-form" onSubmit={handleSubmission} autoComplete="off">
             {!wantsExistingAccess && (
-              <input type="email" placeholder="EMAIL" maxLength={50} />
+              <>
+                <input 
+                  type="text" 
+                  name="firstName"
+                  placeholder="FIRST NAME" 
+                  maxLength={50} 
+                  value={formData.firstName}
+                  onChange={handleChange}
+                />
+                <input 
+                  type="text" 
+                  name="lastName"
+                  placeholder="LAST NAME" 
+                  maxLength={50} 
+                  value={formData.lastName}
+                  onChange={handleChange}
+                />
+              </>
             )}
+
+            <input 
+              type="email" 
+              name="email"
+              placeholder="EMAIL" 
+              maxLength={50} 
+              value={formData.email}
+              onChange={handleChange}
+            />
             
-            <input type="password" placeholder="PASSWORD" maxLength={50} />
+            <input 
+              type="password" 
+              name="password"
+              placeholder="PASSWORD" 
+              maxLength={50} 
+              value={formData.password}
+              onChange={handleChange}
+            />
             
             <button type="submit" className="gate-submit">
               {wantsExistingAccess ? 'ENTER' : 'CREATE'}
