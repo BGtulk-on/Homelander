@@ -33,7 +33,7 @@ CREATE TABLE contacts (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     phone VARCHAR(20),
-    address_ TEXT,
+    address TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

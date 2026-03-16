@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Entity
 @Table(name = "equipment")
-@Data // Това автоматично прави Getter-и и Setter-и (ако имаш Lombok)
+@Data
 public class Equipment {
 
     @Id
@@ -15,8 +15,10 @@ public class Equipment {
     private String name;
     private String type;
     private String serialNumber;
+    private String photoUrl;
 
-    // Полетата за зачисляване, които поиска
     private boolean isAssigned = false;
-    private String assignedTo; // Тук ще пазим името на човека или ID
+    private String assignedTo;
+
+
 }
