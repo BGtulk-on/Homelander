@@ -5,4 +5,5 @@ public enum EquipmentCondition {
     GOOD,
     VERY_GOOD,
     EXCELLENT
-}
+}    
+
