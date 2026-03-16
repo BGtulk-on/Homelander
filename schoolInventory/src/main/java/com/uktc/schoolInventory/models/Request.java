@@ -1,0 +1,51 @@
+package com.uktc.schoolInventory.models;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
+import java.time.OffsetDateTime;
+
+@Entity
+@Table(name = "requests")
+@Data
+public class Request {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "user_id")
+    private Long userId;
+
+    @Column(name = "equipment_id")
+    private Long equipmentId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "request_status")
+    private RequestStatusType requestStatus;
+
+    @Column(name = "requested_start_date")
+    private OffsetDateTime requestedStartDate;
+
+    @Column(name = "requested_end_date")
+    private OffsetDateTime requestedEndDate;
+
+    @Column(name = "approved_by_admin_id")
+    private Long approvedByAdminId;
+
+    @Column(name = "actual_return_date")
+    private OffsetDateTime actualReturnDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "return_condition")
+    private EquipmentCondition returnCondition;
+
+    @Column(name = "created_at")
+    private OffsetDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = OffsetDateTime.now();
+        }
+    }
+}

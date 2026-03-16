@@ -15,7 +15,7 @@ CREATE TYPE request_status_type AS ENUM (
 CREATE TYPE equipment_condition AS ENUM (
     'POOR', 
     'GOOD', 
-    'VERY GOOD', 
+    'VERY_GOOD', 
     'EXCELLENT'
 );
 
@@ -131,7 +131,7 @@ VALUES
 INSERT INTO equipment (name, type_id, serial_number, status, current_condition, location_id, photo_url)
 VALUES
 ('Dell XPS 13', 1, 'SN1001', 'Available', 'EXCELLENT', 1, 'https://example.com/dellxps13.png'),
-('Canon EOS 5D', 3, 'SN2001', 'Checked Out', 'VERY GOOD', 3, 'https://example.com/canon5d.png'),
+('Canon EOS 5D', 3, 'SN2001', 'Checked Out', 'VERY_GOOD', 3, 'https://example.com/canon5d.png'),
 ('Epson Projector', 2, 'SN3001', 'Under Repair', 'GOOD', 2, 'https://example.com/epsonproj.png'),
 ('iPad Pro', 4, 'SN4001', 'Available', 'EXCELLENT', 4, 'https://example.com/ipadpro.png');
 
