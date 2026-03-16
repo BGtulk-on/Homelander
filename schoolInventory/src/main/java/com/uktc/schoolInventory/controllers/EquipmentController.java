@@ -1,55 +1,43 @@
-package com.uktc.schoolInventory.controllers; // Важно: този ред казва на Java къде се намира файлът
+package com.uktc.schoolInventory.controllers;
 
 import com.uktc.schoolInventory.models.Equipment;
-import com.uktc.schoolInventory.repositories.EquipmentRepository;
+import com.uktc.schoolInventory.services.EquipmentService;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/equipment")
 public class EquipmentController {
 
-    private final EquipmentRepository repository;
+    private final EquipmentService service;
 
-    public EquipmentController(EquipmentRepository repository) {
-        this.repository = repository;
+    // Инжектираме Service-а вместо Repository-то
+    public EquipmentController(EquipmentService service) {
+        this.service = service;
     }
-    
-    // GET
+
     @GetMapping
     public List<Equipment> getAll() {
-        return repository.findAll();
+        return service.getAllEquipment();
     }
 
-    // 1. Create
     @PostMapping
     public Equipment create(@RequestBody Equipment equipment) {
-        return repository.save(equipment);
+        return service.createEquipment(equipment);
     }
 
-    // 2. Update
     @PutMapping("/{id}")
     public Equipment update(@PathVariable Long id, @RequestBody Equipment details) {
-        Equipment equipment = repository.findById(id).orElseThrow();
-        equipment.setName(details.getName());
-        equipment.setType(details.getType());
-        equipment.setSerialNumber(details.getSerialNumber());
-        return repository.save(equipment);
+        return service.updateEquipment(id, details);
     }
 
-    // 3. Delete
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
-        repository.deleteById(id);
+        service.deleteEquipment(id);
     }
 
-    // 4. Assign
     @PatchMapping("/{id}/assign")
     public Equipment assign(@PathVariable Long id, @RequestParam String personName) {
-        Equipment equipment = repository.findById(id).orElseThrow();
-        equipment.setAssigned(true);
-        equipment.setAssignedTo(personName);
-        return repository.save(equipment);
+        return service.assignEquipment(id, personName);
     }
 }
