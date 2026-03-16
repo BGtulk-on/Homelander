@@ -1,9 +1,11 @@
 package com.uktc.schoolInventory.services;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.uktc.schoolInventory.models.Equipment;
 import com.uktc.schoolInventory.repositories.EquipmentRepository;
-import org.springframework.stereotype.Service;
-import java.util.List;
 
 @Service
 public class EquipmentService {
@@ -29,7 +31,8 @@ public class EquipmentService {
         equipment.setName(details.getName());
         equipment.setTypeId(details.getTypeId());
         equipment.setSerialNumber(details.getSerialNumber());
-        equipment.setPhotoUrl(details.getPhotoUrl()); // Обновяваме и снимката
+        equipment.setPhotoUrl(details.getPhotoUrl());
+        equipment.setCurrentCondition(details.getCurrentCondition());
 
         return repository.save(equipment);
     }

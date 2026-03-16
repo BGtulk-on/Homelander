@@ -41,6 +41,9 @@ public class Equipment {
     @Column(name = "is_assigned")
     private boolean isAssigned = false;
 
+    @Column(name = "assigned_to")
+    private String assignedTo;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private OffsetDateTime createdAt;
 

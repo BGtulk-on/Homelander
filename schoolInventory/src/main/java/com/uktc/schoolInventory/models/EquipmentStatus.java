@@ -1,5 +1,5 @@
 package com.uktc.schoolInventory.models;
 
 public enum EquipmentStatus {
-    Available, CheckedOut, UnderRepair, Retired
+    Available, Checked_Out, Under_Repair, Retired
 }
