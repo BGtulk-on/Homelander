@@ -27,7 +27,7 @@ public class EquipmentService {
                 .orElseThrow(() -> new RuntimeException("Equipment not found with id: " + id));
 
         equipment.setName(details.getName());
-        equipment.setType(details.getType());
+        equipment.setTypeId(details.getTypeId());
         equipment.setSerialNumber(details.getSerialNumber());
         equipment.setPhotoUrl(details.getPhotoUrl()); // Обновяваме и снимката
 
@@ -43,7 +43,7 @@ public class EquipmentService {
                 .orElseThrow(() -> new RuntimeException("Equipment not found"));
 
         equipment.setAssigned(true);
-        equipment.setAssignedTo(personName);
+        equipment.setName(personName);
 
         return repository.save(equipment);
     }

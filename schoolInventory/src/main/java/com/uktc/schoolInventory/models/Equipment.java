@@ -16,6 +16,7 @@ public class Equipment {
     @Column(nullable = false)
     private String name;
 
+    // Връзка към таблица equipment_types
     @Column(name = "type_id")
     private Integer typeId;
 
@@ -30,6 +31,7 @@ public class Equipment {
     @Column(name = "current_condition", columnDefinition = "equipment_condition")
     private EquipmentCondition currentCondition;
 
+    // Връзка към таблица locations
     @Column(name = "location_id")
     private Integer locationId;
 

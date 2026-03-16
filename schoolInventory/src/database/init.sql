@@ -1,7 +1,7 @@
 CREATE TYPE equipment_status AS ENUM (
     'Available', 
-    'Checked Out', 
-    'Under Repair', 
+    'Checked_Out', 
+    'Under_Repair', 
     'Retired'
 );
 
@@ -15,7 +15,7 @@ CREATE TYPE request_status_type AS ENUM (
 CREATE TYPE equipment_condition AS ENUM (
     'POOR', 
     'GOOD', 
-    'VERY GOOD', 
+    'VERY_GOOD', 
     'EXCELLENT'
 );
 
@@ -99,7 +99,7 @@ VALUES
 -- ======================
 -- Contacts
 -- ======================
-INSERT INTO contacts (user_id, phone, address_)
+INSERT INTO contacts (user_id, phone, address)
 VALUES
 (1, '+359888111222', 'Sofia, Bulgaria'),
 (2, '+359888333444', 'Plovdiv, Bulgaria'),
@@ -131,8 +131,8 @@ VALUES
 INSERT INTO equipment (name, type_id, serial_number, status, current_condition, location_id, photo_url)
 VALUES
 ('Dell XPS 13', 1, 'SN1001', 'Available', 'EXCELLENT', 1, 'https://example.com/dellxps13.png'),
-('Canon EOS 5D', 3, 'SN2001', 'Checked Out', 'VERY GOOD', 3, 'https://example.com/canon5d.png'),
-('Epson Projector', 2, 'SN3001', 'Under Repair', 'GOOD', 2, 'https://example.com/epsonproj.png'),
+('Canon EOS 5D', 3, 'SN2001', 'Checked_Out', 'VERY_GOOD', 3, 'https://example.com/canon5d.png'),
+('Epson Projector', 2, 'SN3001', 'Under_Repair', 'GOOD', 2, 'https://example.com/epsonproj.png'),
 ('iPad Pro', 4, 'SN4001', 'Available', 'EXCELLENT', 4, 'https://example.com/ipadpro.png');
 
 -- ======================
