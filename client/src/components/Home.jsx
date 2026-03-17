@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
+import UsersTab from './UsersTab'
 import './Home.css'
 
 export default function Home({ userRole, onLogout }) {
@@ -8,6 +9,7 @@ export default function Home({ userRole, onLogout }) {
   const [isUsersAnimating, setIsUsersAnimating] = useState(false)
   const [isEquipmentAnimating, setIsEquipmentAnimating] = useState(false)
   const [isRequestsAnimating, setIsRequestsAnimating] = useState(false)
+  const [activeTab, setActiveTab] = useState(null)
 
   useEffect(() => {
     gsap.fromTo(contentRef.current,
@@ -17,11 +19,10 @@ export default function Home({ userRole, onLogout }) {
 
     if (navRef.current) {
       const icons = navRef.current.querySelectorAll('.home-nav-icon-btn')
-      const logoutBtn = navRef.current.querySelector('.home-nav-logout')
       
       const tl = gsap.timeline({ delay: 0.3 })
 
-      tl.fromTo([...icons, logoutBtn],
+      tl.fromTo(icons,
         { autoAlpha: 0, y: 40 },
         { 
           autoAlpha: 1, 
@@ -40,6 +41,7 @@ export default function Home({ userRole, onLogout }) {
   const triggerUsersAnimation = () => {
     if (isUsersAnimating) return
     setIsUsersAnimating(true)
+    setActiveTab('users')
     setTimeout(() => setIsUsersAnimating(false), 700)
   }
 
@@ -60,7 +62,7 @@ export default function Home({ userRole, onLogout }) {
       {userRole === 'admin' && (
         <aside className="home-sidebar">
           <div className="home-sidebar-content">
-            {/* Top content */}
+            {activeTab === 'users' && <UsersTab />}
           </div>
           
           <nav className="home-nav-bottom" ref={navRef}>
@@ -133,11 +135,10 @@ export default function Home({ userRole, onLogout }) {
                 </svg>
               </button>
             </div>
-            <button className="home-nav-logout" onClick={onLogout}>LOGOUT</button>
           </nav>
         </aside>
       )}
-      <div className="home-dashboard-area" ref={contentRef}>
+      <div className={`home-dashboard-area ${activeTab === 'users' ? 'no-padding' : ''}`} ref={contentRef}>
       </div>
     </div>
   )
