@@ -1,8 +1,9 @@
 package com.uktc.schoolInventory.repositories;
 
-import com.uktc.schoolInventory.models.Equipment;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface EquipmentRepository extends JpaRepository<Equipment, Long> {
-    // Тук автоматично имаме save(), findById(), deleteById() и т.н.
+import com.uktc.schoolInventory.models.Equipment;
+
+public interface EquipmentRepository extends JpaRepository<Equipment, Long>, JpaSpecificationExecutor<Equipment> {
 }
