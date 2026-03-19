@@ -4,6 +4,7 @@ import com.uktc.schoolInventory.models.EquipmentCondition;
 import com.uktc.schoolInventory.models.Request;
 import com.uktc.schoolInventory.models.RequestStatusType;
 import com.uktc.schoolInventory.repositories.RequestRepository;
+import com.uktc.schoolInventory.services.RequestService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,26 +15,22 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/requests")
 public class RequestController {
+    private final RequestService requestService;
     private final RequestRepository repository;
 
-    public RequestController(RequestRepository repository) {
+    public RequestController(RequestService requestService, RequestRepository repository) {
+        this.requestService = requestService;
         this.repository = repository;
-    }
-
-    @GetMapping
-    public List<Request> getAll() {
-        return repository.findAll();
     }
 
     @PostMapping
     public ResponseEntity<Request> createRequest(@RequestBody Request request) {
-        request.setRequestStatus(RequestStatusType.PENDING);
-        Request saved = repository.save(request);
+        // Извикваме метода в Service, който праща имейл
+        Request saved = requestService.createRequest(request);
         return ResponseEntity
                 .created(URI.create("/api/requests/" + saved.getId()))
                 .body(saved);
     }
-
     @PutMapping("/{id}/approve")
     public ResponseEntity<Request> approveRequest(@PathVariable Long id, @RequestParam Long adminId) {
         return repository.findById(id)
@@ -67,4 +64,6 @@ public class RequestController {
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
+
+
 }
