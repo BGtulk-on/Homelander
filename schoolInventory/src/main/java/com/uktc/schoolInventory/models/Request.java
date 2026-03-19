@@ -21,11 +21,13 @@ public class Request {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id")
-    private Long userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    @Column(name = "equipment_id")
-    private Long equipmentId;
+    @ManyToOne
+    @JoinColumn(name = "equipment_id")
+    private Equipment equipment;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "request_status")
