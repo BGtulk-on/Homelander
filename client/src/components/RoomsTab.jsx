@@ -41,7 +41,7 @@ function EquipmentItem({ item, isExpanded, onToggle }) {
           <div ref={detailsRef} className="equipment-details" style={{ height: 0, opacity: 0, overflow: 'hidden' }}>
             <div className="details-content">
               <div className="detail-item"><strong>Serial:</strong> {item.serialNumber}</div>
-              <div className="detail-item"><strong>Condition:</strong> {item.currentCondition || 'Unknown'}</div>
+              <div className="detail-item"><strong>Condition:</strong> {(item.currentCondition || 'Unknown').replace('_', ' ')}</div>
               <div className="detail-item"><strong>Assigned To:</strong> {item.assignedTo || 'Unassigned'}</div>
               <div className="detail-item"><strong>Assigned:</strong> {item.assigned ? 'Yes' : 'No'}</div>
             </div>
@@ -141,11 +141,14 @@ export default function RoomsTab({ refreshTrigger }) {
   const [error, setError] = useState(null)
   
   const containerRef = useRef(null)
+  const hasAnimatedInRef = useRef(false)
 
   useEffect(() => {
     const fetchEquipment = async () => {
       try {
-        setIsLoading(true)
+        if (!hasAnimatedInRef.current) {
+          setIsLoading(true)
+        }
         const res = await fetch('/api/equipment')
         if (!res.ok) throw new Error('Failed to fetch rooms data')
         const data = await res.json()
@@ -177,7 +180,8 @@ export default function RoomsTab({ refreshTrigger }) {
   }, [refreshTrigger])
 
   useLayoutEffect(() => {
-    if (!isLoading && rooms.length > 0 && containerRef.current) {
+    if (!isLoading && rooms.length > 0 && containerRef.current && !hasAnimatedInRef.current) {
+      hasAnimatedInRef.current = true
       gsap.fromTo(containerRef.current.querySelectorAll('.room-card'),
         { opacity: 0, y: 20 },
         { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: 'power3.out' }

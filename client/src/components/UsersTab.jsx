@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useLayoutEffect } from 'react'
 import gsap from 'gsap'
 import './UsersTab.css'
 
-function ActionConfirmBtn({ actionText, confirmText, onClick }) {
+function ActionConfirmBtn({ actionText, confirmText, onClick, disabled }) {
   const [isConfirming, setIsConfirming] = useState(false)
   const textContainerRef = useRef(null)
   const timeoutRef = useRef(null)
@@ -13,6 +13,7 @@ function ActionConfirmBtn({ actionText, confirmText, onClick }) {
 
   const handleClick = (e) => {
     e.stopPropagation()
+    if (disabled) return
     if (!isConfirming) {
       setIsConfirming(true)
       gsap.to(textContainerRef.current, { y: '-50%', duration: 0.25, ease: 'power2.out' })
@@ -28,7 +29,7 @@ function ActionConfirmBtn({ actionText, confirmText, onClick }) {
   }
 
   return (
-    <button className="users-tab-action-btn" onClick={handleClick}>
+    <button className="users-tab-action-btn" onClick={handleClick} disabled={disabled}>
       <div style={{ height: '1.2rem', overflow: 'hidden', position: 'relative' }}>
         <div 
           ref={textContainerRef} 
@@ -44,7 +45,7 @@ function ActionConfirmBtn({ actionText, confirmText, onClick }) {
       </div>
     </button>
   )
-}
+  }
 
 function UserItem({ user, isExpanded, onToggle, onMakeAdmin, onApprove, onDelete }) {
   const bodyRef = useRef(null)
@@ -61,10 +62,8 @@ function UserItem({ user, isExpanded, onToggle, onMakeAdmin, onApprove, onDelete
       gsap.set(bodyRef.current, {
         height: isExpanded ? 'auto' : 0,
         opacity: isExpanded ? 1 : 0,
-        paddingTop: isExpanded ? '2px' : 0,
-        paddingBottom: isExpanded ? '6px' : 0,
-        paddingLeft: isExpanded ? '4px' : 0,
-        paddingRight: isExpanded ? '4px' : 0,
+        paddingTop: isExpanded ? '4px' : 0,
+        paddingBottom: isExpanded ? '8px' : 0,
         borderTopColor: isExpanded ? 'rgba(160, 67, 10, 0.4)' : 'transparent'
       })
       return
@@ -74,10 +73,8 @@ function UserItem({ user, isExpanded, onToggle, onMakeAdmin, onApprove, onDelete
       gsap.to(bodyRef.current, {
         height: 'auto',
         opacity: 1,
-        paddingTop: '2px',
-        paddingBottom: '6px',
-        paddingLeft: '4px',
-        paddingRight: '4px',
+        paddingTop: '4px',
+        paddingBottom: '8px',
         borderTopColor: 'rgba(160, 67, 10, 0.4)',
         duration: 0.3,
         ease: 'power2.inOut'
@@ -88,8 +85,6 @@ function UserItem({ user, isExpanded, onToggle, onMakeAdmin, onApprove, onDelete
         opacity: 0,
         paddingTop: 0,
         paddingBottom: 0,
-        paddingLeft: 0,
-        paddingRight: 0,
         borderTopColor: 'transparent',
         duration: 0.3,
         ease: 'power2.inOut'
@@ -158,9 +153,14 @@ function UserItem({ user, isExpanded, onToggle, onMakeAdmin, onApprove, onDelete
         className="users-tab-item-header"
         onClick={() => !isRemoving && onToggle(user.id)}
       >
-        <span className="users-tab-username">
-          {user.firstName} {user.lastName}
-        </span>
+        <div className="users-tab-header-main">
+          <span className="users-tab-username">
+            {user.firstName} {user.lastName}
+          </span>
+          <span className="users-tab-type-tag">
+            {user.isAdmin ? 'Admin' : 'User'}
+          </span>
+        </div>
         <svg 
           className={`users-tab-icon ${isExpanded ? 'expanded' : ''}`} 
           viewBox="0 0 24 24" 
@@ -177,20 +177,44 @@ function UserItem({ user, isExpanded, onToggle, onMakeAdmin, onApprove, onDelete
         style={{ overflow: 'hidden' }}
       >
         <div className="users-tab-body-info">
-          <p>{user.email}</p>
-          <p>{user.phone || 'No phone provided'}</p>
-          <p>{user.address || 'No address provided'}</p>
-          {user.isAdmin && (
-            <div style={{ marginTop: '0.4rem' }}>
-              <span 
-                className="users-tab-badge-admin" 
-                ref={badgeRef}
-                style={{ display: 'inline-flex', opacity: 0 }}
-              >
-                Admin
+          <div className="users-info-grid">
+            <div className="users-info-item full-width" title="Role">
+              <span className="info-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </span>
+              <span className="info-value">
+                {user.isAdmin ? 'Administrator' : 'User'}
               </span>
             </div>
-          )}
+
+            <div className="users-info-item full-width" title="Email">
+              <span className="info-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              </span>
+              <span className="info-value">{user.email}</span>
+            </div>
+            
+            <div className="users-info-item full-width" title="Phone">
+              <span className="info-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              </span>
+              <span className="info-value">{user.phone || 'N/A'}</span>
+            </div>
+
+            <div className="users-info-item" title="Address">
+              <span className="info-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              </span>
+              <span className="info-value">{user.address || 'N/A'}</span>
+            </div>
+
+            <div className="users-info-item" title="Joined Date">
+              <span className="info-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </span>
+              <span className="info-value">{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</span>
+            </div>
+          </div>
         </div>
         
         <div className="users-tab-actions">

@@ -1,22 +1,22 @@
 .equip-tab-container {
-  width: 90%;
+  width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 0;
+  padding: 0 1.5rem; /* Larger, fixed side space */
   box-sizing: border-box;
 }
 
 .equip-tab-search-wrapper {
-  margin-bottom: 0.35rem;
-  padding: 0 2px;
+  margin-bottom: 0.8rem;
   width: 100%;
   box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .equip-tab-search {
   width: 100%;
-  padding: 0.6rem 1rem;
+  padding: 0.6rem 1.2rem;
   background: transparent;
   border: 2.5px solid #A0430A;
   border-radius: 6px;
@@ -34,8 +34,9 @@
 
 /* Add New Equipment Bubble */
 .equip-tab-add-wrapper {
-  margin-bottom: 0.35rem;
-  padding: 0 2px;
+  margin-bottom: 0.8rem;
+  width: 100%;
+  flex-shrink: 0;
 }
 
 .equip-tab-add-toggle {
@@ -58,21 +59,17 @@
   background-color: rgba(160, 67, 10, 0.05);
 }
 
-.equip-tab-add-toggle.active {
-  background-color: transparent;
-  color: #A0430A;
-}
-
 .plus-icon {
   font-size: 1.4rem;
   line-height: 1;
 }
 
 .equip-tab-add-form-container {
-  border: 1.5px solid #A0430A;
-  border-radius: 8px;
-  margin-top: 5px;
-  padding: 0 1rem;
+  border: 2.5px solid #A0430A;
+  border-radius: 16px;
+  margin-top: 8px;
+  padding: 0 1.2rem;
+  flex-shrink: 0;
 }
 
 .equip-tab-add-form {
@@ -99,26 +96,20 @@
   gap: 0.8rem;
 }
 
-.equip-tab-add-form input::placeholder {
-  color: #A0430A;
-}
-
-.equip-tab-add-form input:focus,
-.equip-tab-add-form select:focus {
-  background: rgba(160, 67, 10, 0.03);
-}
-
 .equip-tab-submit-btn {
   background: transparent;
   color: #A0430A;
-  border: 1.5px solid #A0430A;
-  padding: 0.6rem;
-  border-radius: 4px;
+  border: 2px solid #A0430A;
+  padding: 0.25rem 0.4rem;
+  border-radius: 8px;
   font-family: 'Clash Grotesk', sans-serif;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   text-transform: uppercase;
   transition: all 0.2s ease;
+  margin-bottom: 1rem;
+  width: 100%; /* Make it consistent with bottom buttons */
 }
 
 .equip-tab-submit-btn:hover {
@@ -130,13 +121,15 @@
 .equip-tab-list {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.4rem;
   width: 100%;
-  padding: 0 2px 2rem 2px;
+  padding: 0 0 2rem 0;
   box-sizing: border-box;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: none;
+  flex: 1; /* Take all remaining space */
+  min-height: 0; /* Important for flex-basis interaction with overflow */
 }
 
 .equip-tab-list::-webkit-scrollbar {
@@ -147,20 +140,28 @@
   width: 100%;
   box-sizing: border-box;
   border: 2.5px solid #A0430A;
-  border-radius: 4px;
-  background: transparent;
-  transition: background-color 0.2s ease;
+  border-radius: 6px; /* Smaller base radius for middle items */
+  background: rgba(255, 255, 255, 0.02);
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+  flex-shrink: 0;
+  opacity: 0;
 }
 
-.equip-tab-item-box:first-child { border-radius: 16px 16px 4px 4px; }
-.equip-tab-item-box:last-child { border-radius: 4px 4px 16px 16px; }
-.equip-tab-item-box:first-child:last-child { border-radius: 16px; }
+.equip-tab-item-box:first-child { border-top-left-radius: 20px; border-top-right-radius: 20px; }
+.equip-tab-item-box:last-child { border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
+.equip-tab-item-box:first-child:last-child { border-radius: 20px; }
+
+.equip-tab-item-box.expanded {
+  background: rgba(160, 67, 10, 0.03);
+  border-color: #A0430A;
+  box-shadow: 0 4px 12px rgba(160, 67, 10, 0.1);
+}
 
 .equip-tab-item-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.6rem 1rem;
+  padding: 0.8rem 1.2rem;
   cursor: pointer;
   background: transparent;
   border: none;
@@ -168,18 +169,40 @@
   text-align: left;
   color: #A0430A;
   font-family: 'Clash Grotesk', sans-serif;
-  font-size: 1.15rem;
-  font-weight: 500;
+  transition: background-color 0.2s;
+  border-radius: 10px;
 }
 
-.equip-tab-item-header:hover {
-  background-color: rgba(160, 67, 10, 0.05);
+.equip-tab-header-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.equip-tab-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 3px 5px;
+  border: 1px solid transparent;
+  display: block;
+}
+
+.equip-tab-type-tag {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+  font-weight: 500;
+  padding-left: 5px;
 }
 
 .equip-tab-icon {
-  width: 20px;
-  height: 20px;
-  transition: transform 0.3s ease;
+  width: 18px;
+  height: 18px;
+  opacity: 0.8;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .equip-tab-icon.expanded {
@@ -187,34 +210,165 @@
 }
 
 .equip-tab-item-body {
-  padding: 0 1rem;
+  padding: 0 1.2rem;
+  border-top: 1px solid transparent;
 }
 
 .equip-tab-body-info {
-  font-size: 0.9rem;
-  margin-bottom: 0.8rem;
+  margin-top: 0.5rem;
 }
 
-.equip-tab-body-info p {
-  margin: 0.3rem 0;
+.equip-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.8rem 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.equip-info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(160, 67, 10, 0.04);
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid rgba(160, 67, 10, 0.1);
+  min-height: 2.2rem;
+  box-sizing: border-box;
+}
+
+.photo-url-field-container {
+  grid-column: span 2;
+  overflow: hidden;
+  height: 0;
+  opacity: 0;
+}
+
+.equip-info-item.full-width {
+  grid-column: span 2;
+}
+
+.info-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #A0430A;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.info-value {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #A0430A;
+  word-break: break-all;
+  line-height: 1.2;
+  padding: 3px 7px;
+  border: 1px solid transparent;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Status Colors */
+.info-value.status-available { color: #2e7d32; }
+.info-value.status-checked-out { color: #ed6c02; }
+.info-value.status-under-repair { color: #d32f2f; }
+.info-value.status-retired { color: #757575; }
+
+.equip-photo-preview {
+  margin: 0.5rem 0 1.2rem 0;
+  width: 100%;
+  height: 120px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1.5px solid rgba(160, 67, 10, 0.2);
+}
+
+.equip-photo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .equip-tab-actions {
   display: flex;
-  padding-bottom: 0.8rem;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-bottom: 1rem;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.edit-logic-container {
+  position: relative;
+  width: 100%;
+  height: 1.75rem;
+  overflow: visible;
+}
+
+.equip-tab-actions-row {
+  display: flex;
+  gap: 0.4rem;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+}
+
+.equip-tab-actions-row > * {
+  flex: 1;
+}
+
+.edit-main-btn {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 2;
+  height: 100%;
+}
+
+.btn-text {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.edit-input {
+  width: 100%;
+  background: rgba(160, 67, 10, 0.08);
+  border: 1px solid #A0430A;
+  border-radius: 4px;
+  color: #A0430A;
+  font-family: 'Clash Grotesk', sans-serif;
+  font-size: 0.85rem;
+  padding: 2px 6px;
+  outline: none;
+  line-height: 1.2;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.edit-input:focus {
+  background: rgba(160, 67, 10, 0.12);
 }
 
 .equip-tab-action-btn {
   background: transparent;
-  border: 1.5px solid #A0430A;
+  border: 2px solid #A0430A;
   color: #A0430A;
-  padding: 0.3rem 1rem;
-  border-radius: 4px;
+  padding: 0.25rem 0.4rem;
   cursor: pointer;
+  border-radius: 8px;
   font-family: 'Clash Grotesk', sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 600;
   text-transform: uppercase;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: center;
 }
 
 .equip-tab-action-btn:hover {
@@ -223,6 +377,8 @@
 }
 
 .equip-tab-loading, .equip-tab-error {
-  padding: 1rem;
+  padding: 2rem 1rem;
+  text-align: center;
   color: #A0430A;
+  font-weight: 500;
 }

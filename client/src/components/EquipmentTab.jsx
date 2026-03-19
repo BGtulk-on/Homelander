@@ -2,11 +2,72 @@ import { useEffect, useState, useRef, useLayoutEffect } from 'react'
 import gsap from 'gsap'
 import './EquipmentTab.css'
 
-function EquipmentItem({ item, isExpanded, onToggle, onDelete }) {
+function ActionConfirmBtn({ actionText, confirmText, onClick, disabled }) {
+  const [isConfirming, setIsConfirming] = useState(false)
+  const textContainerRef = useRef(null)
+  const timeoutRef = useRef(null)
+
+  useEffect(() => {
+    return () => clearTimeout(timeoutRef.current)
+  }, [])
+
+  const handleClick = (e) => {
+    e.stopPropagation()
+    if (disabled) return
+    if (!isConfirming) {
+      setIsConfirming(true)
+      gsap.to(textContainerRef.current, { y: '-50%', duration: 0.25, ease: 'power2.out' })
+      
+      timeoutRef.current = setTimeout(() => {
+        setIsConfirming(false)
+        gsap.to(textContainerRef.current, { y: '0%', duration: 0.25, ease: 'power2.out' })
+      }, 3000)
+    } else {
+      clearTimeout(timeoutRef.current)
+      onClick()
+    }
+  }
+
+  return (
+    <button className="equip-tab-action-btn" onClick={handleClick} disabled={disabled}>
+      <div style={{ height: '1.2rem', overflow: 'hidden', position: 'relative' }}>
+        <div 
+          ref={textContainerRef} 
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: '2.4rem' }}
+        >
+          <span style={{ flex: '0 0 1.2rem', display: 'flex', alignItems: 'center' }}>
+            {actionText}
+          </span>
+          <span style={{ flex: '0 0 1.2rem', display: 'flex', alignItems: 'center', opacity: 0.8 }}>
+            {confirmText}
+          </span>
+        </div>
+      </div>
+    </button>
+  )
+}
+
+function EquipmentItem({ item, isExpanded, onToggle, onDelete, onUpdate }) {
   const bodyRef = useRef(null)
   const containerRef = useRef(null)
+  const actionsRef = useRef(null)
+  const photoUrlRef = useRef(null)
   const [isRemoving, setIsRemoving] = useState(false)
+  const [imgError, setImgError] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editedItem, setEditedItem] = useState({ ...item })
 
+  const getTypeName = (id) => {
+    const types = { 1: 'Laptop', 2: 'Projector', 3: 'Camera', 4: 'Tablet' }
+    return types[id] || 'Other'
+  }
+
+  const getLocationName = (id) => {
+    const locations = { 1: 'Room 1', 2: 'Room 2', 3: 'Room 3', 4: 'Room 4' }
+    return locations[id] || 'Storage'
+  }
+
+  // Handle body expansion/collapse
   useLayoutEffect(() => {
     if (!bodyRef.current) return
     
@@ -15,10 +76,8 @@ function EquipmentItem({ item, isExpanded, onToggle, onDelete }) {
       gsap.set(bodyRef.current, {
         height: isExpanded ? 'auto' : 0,
         opacity: isExpanded ? 1 : 0,
-        paddingTop: isExpanded ? '2px' : 0,
-        paddingBottom: isExpanded ? '6px' : 0,
-        paddingLeft: isExpanded ? '4px' : 0,
-        paddingRight: isExpanded ? '4px' : 0,
+        paddingTop: isExpanded ? '4px' : 0,
+        paddingBottom: isExpanded ? '8px' : 0,
         borderTopColor: isExpanded ? 'rgba(160, 67, 10, 0.4)' : 'transparent'
       })
       return
@@ -28,28 +87,99 @@ function EquipmentItem({ item, isExpanded, onToggle, onDelete }) {
       gsap.to(bodyRef.current, {
         height: 'auto',
         opacity: 1,
-        paddingTop: '2px',
-        paddingBottom: '6px',
-        paddingLeft: '4px',
-        paddingRight: '4px',
+        paddingTop: '4px',
+        paddingBottom: '8px',
         borderTopColor: 'rgba(160, 67, 10, 0.4)',
         duration: 0.3,
         ease: 'power2.inOut'
       })
     } else {
+      setIsEditing(false)
       gsap.to(bodyRef.current, {
         height: 0,
         opacity: 0,
         paddingTop: 0,
         paddingBottom: 0,
-        paddingLeft: 0,
-        paddingRight: 0,
         borderTopColor: 'transparent',
         duration: 0.3,
         ease: 'power2.inOut'
       })
     }
   }, [isExpanded])
+
+  // Handle Image URL field expansion and body adjustment when editing toggles
+  useLayoutEffect(() => {
+    if (!photoUrlRef.current || !bodyRef.current || !isExpanded) return
+    
+    const startHeight = bodyRef.current.getBoundingClientRect().height;
+    
+    if (isEditing) {
+      // 1. Measure new height
+      gsap.set(photoUrlRef.current, { height: 'auto', opacity: 1 });
+      const endHeight = bodyRef.current.scrollHeight;
+      
+      // 2. Animate field
+      gsap.fromTo(photoUrlRef.current, 
+        { height: 0, opacity: 0 }, 
+        { height: 'auto', opacity: 1, duration: 0.3, ease: 'power2.out' }
+      )
+      
+      // 3. Animate body border (the box)
+      gsap.fromTo(bodyRef.current,
+        { height: startHeight },
+        { height: endHeight, duration: 0.3, ease: 'power2.out', onComplete: () => {
+          gsap.set(bodyRef.current, { height: 'auto' });
+        }}
+      )
+    } else {
+      const currentHeight = bodyRef.current.getBoundingClientRect().height;
+      gsap.set(photoUrlRef.current, { height: 0, opacity: 0 });
+      const targetHeight = bodyRef.current.scrollHeight;
+      
+      // Reset for closure animation
+      gsap.set(photoUrlRef.current, { height: 'auto', opacity: 1 });
+      
+      gsap.to(photoUrlRef.current, { height: 0, opacity: 0, duration: 0.25, ease: 'power2.in' });
+      gsap.fromTo(bodyRef.current,
+        { height: currentHeight },
+        { height: targetHeight, duration: 0.25, ease: 'power2.in', onComplete: () => {
+          gsap.set(bodyRef.current, { height: 'auto' });
+        }}
+      )
+    }
+  }, [isEditing, isExpanded])
+
+  // Split button animation
+  useLayoutEffect(() => {
+    if (!actionsRef.current) return
+    const editMain = actionsRef.current.querySelector('.edit-main-btn')
+    const editText = editMain.querySelector('.btn-text')
+    const splitRow = actionsRef.current.querySelector('.equip-tab-actions-row')
+    const cancelText = splitRow.querySelector('button:first-child .btn-text')
+    const saveText = splitRow.querySelector('button:last-child .btn-text')
+
+    const tl = gsap.timeline()
+
+    if (isEditing) {
+      tl.to(editText, { opacity: 0, duration: 0.1, ease: 'power2.in' })
+      tl.set(editMain, { opacity: 0, pointerEvents: 'none' })
+      tl.set(splitRow, { opacity: 1, pointerEvents: 'all', gap: 0 })
+      tl.set([cancelText, saveText], { opacity: 0 })
+      tl.to(splitRow, { gap: '-2px', duration: 0.08, ease: 'power2.inOut' })
+      tl.to(splitRow, { 
+        gap: '0.4rem', 
+        duration: 0.5, 
+        ease: 'elastic.out(1.1, 0.6)' 
+      })
+      tl.to([cancelText, saveText], { opacity: 1, duration: 0.15, ease: 'power2.out' }, '-=0.3')
+    } else {
+      tl.to([cancelText, saveText], { opacity: 0, duration: 0.1, ease: 'power2.in' })
+      tl.to(splitRow, { gap: 0, duration: 0.25, ease: 'power3.inOut' })
+      tl.set(splitRow, { opacity: 0, pointerEvents: 'none' })
+      tl.set(editMain, { opacity: 1, pointerEvents: 'all' })
+      tl.to(editText, { opacity: 1, duration: 0.15, ease: 'power2.out' })
+    }
+  }, [isEditing])
 
   const handleDeleteWithAnim = () => {
     setIsRemoving(true)
@@ -71,6 +201,11 @@ function EquipmentItem({ item, isExpanded, onToggle, onDelete }) {
     })
   }
 
+  const handleSave = async () => {
+    const success = await onUpdate(item.id, editedItem)
+    if (success) setIsEditing(false)
+  }
+
   return (
     <div 
       className={`equip-tab-item-box ${isExpanded ? 'expanded' : ''}`} 
@@ -81,9 +216,20 @@ function EquipmentItem({ item, isExpanded, onToggle, onDelete }) {
         className="equip-tab-item-header"
         onClick={() => !isRemoving && onToggle(item.id)}
       >
-        <span className="equip-tab-name">
-          {item.name}
-        </span>
+        <div className="equip-tab-header-main">
+          {isEditing ? (
+            <input 
+              className="edit-input" 
+              value={editedItem.name} 
+              onClick={e => e.stopPropagation()}
+              onChange={e => setEditedItem({ ...editedItem, name: e.target.value })}
+              style={{ fontSize: '1.1rem', fontWeight: 600, padding: '2px 4px' }}
+            />
+          ) : (
+            <span className="equip-tab-name">{item.name}</span>
+          )}
+          <span className="equip-tab-type-tag">{getTypeName(item.typeId)}</span>
+        </div>
         <svg 
           className={`equip-tab-icon ${isExpanded ? 'expanded' : ''}`} 
           viewBox="0 0 24 24" 
@@ -100,19 +246,155 @@ function EquipmentItem({ item, isExpanded, onToggle, onDelete }) {
         style={{ overflow: 'hidden' }}
       >
         <div className="equip-tab-body-info">
-          <p><strong>SN:</strong> {item.serialNumber}</p>
-          <p><strong>Status:</strong> {item.status}</p>
-          <p><strong>Condition:</strong> {item.currentCondition || 'Unknown'}</p>
+          <div className="equip-info-grid">
+            <div className="equip-info-item" title="Serial Number">
+              <span className="info-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 9h16"/><path d="M4 15h16"/><path d="M10 3L8 21"/><path d="M16 3l-2 18"/></svg>
+              </span>
+              {isEditing ? (
+                <input 
+                  className="edit-input" 
+                  value={editedItem.serialNumber} 
+                  onChange={e => setEditedItem({ ...editedItem, serialNumber: e.target.value })}
+                />
+              ) : (
+                <span className="info-value">{item.serialNumber}</span>
+              )}
+            </div>
+            <div className="equip-info-item" title="Status">
+              <span className="info-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              </span>
+              {isEditing ? (
+                <select 
+                  className="edit-input" 
+                  value={editedItem.status} 
+                  onChange={e => setEditedItem({ ...editedItem, status: e.target.value })}
+                >
+                  <option value="Available">Available</option>
+                  <option value="Checked_Out">Checked Out</option>
+                  <option value="Under_Repair">Under Repair</option>
+                  <option value="Retired">Retired</option>
+                </select>
+              ) : (
+                <span className={`info-value status-${item.status.toLowerCase().replace(' ', '-')}`}>
+                  {item.status}
+                </span>
+              )}
+            </div>
+            <div className="equip-info-item" title="Condition">
+              <span className="info-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </span>
+              {isEditing ? (
+                <select 
+                  className="edit-input" 
+                  value={editedItem.currentCondition} 
+                  onChange={e => setEditedItem({ ...editedItem, currentCondition: e.target.value })}
+                >
+                  <option value="EXCELLENT">Excellent</option>
+                  <option value="VERY_GOOD">Very Good</option>
+                  <option value="GOOD">Good</option>
+                  <option value="POOR">Poor</option>
+                </select>
+              ) : (
+                <span className="info-value">{(item.currentCondition || 'N/A').replace('_', ' ')}</span>
+              )}
+            </div>
+            <div className="equip-info-item" title="Location">
+              <span className="info-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              </span>
+              {isEditing ? (
+                <select 
+                  className="edit-input" 
+                  value={editedItem.locationId} 
+                  onChange={e => setEditedItem({ ...editedItem, locationId: parseInt(e.target.value) })}
+                >
+                  <option value={1}>Room 1</option>
+                  <option value={2}>Room 2</option>
+                  <option value={3}>Room 3</option>
+                  <option value={4}>Room 4</option>
+                </select>
+              ) : (
+                <span className="info-value">{getLocationName(item.locationId)}</span>
+              )}
+            </div>
+            <div className="equip-info-item full-width" title="Assigned To">
+              <span className="info-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </span>
+              {isEditing ? (
+                <input 
+                  className="edit-input" 
+                  value={editedItem.assignedTo || ''} 
+                  onChange={e => setEditedItem({ ...editedItem, assignedTo: e.target.value })}
+                />
+              ) : (
+                <span className="info-value">{item.assignedTo || 'Unassigned'}</span>
+              )}
+            </div>
+            
+            <div className="photo-url-field-container" ref={photoUrlRef}>
+              <div className="equip-info-item full-width" title="Image URL">
+                <span className="info-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                </span>
+                <input 
+                  className="edit-input" 
+                  value={editedItem.photoUrl || ''} 
+                  onChange={e => setEditedItem({ ...editedItem, photoUrl: e.target.value })}
+                  placeholder="Image URL"
+                />
+              </div>
+            </div>
+          </div>
+          
+          {item.photoUrl && !imgError && !isEditing && (
+            <div className="equip-photo-preview">
+              <img 
+                src={item.photoUrl} 
+                alt={item.name} 
+                onError={() => setImgError(true)}
+              />
+            </div>
+          )}
         </div>
         
-        <div className="equip-tab-actions">
-          <button 
-            className="equip-tab-action-btn delete" 
+        <div className="equip-tab-actions" ref={actionsRef}>
+          <div className="edit-logic-container">
+            <button 
+              className="equip-tab-action-btn edit-main-btn" 
+              onClick={() => setIsEditing(true)}
+              disabled={isRemoving}
+            >
+              <span className="btn-text">Edit</span>
+            </button>
+            <div className="equip-tab-actions-row" style={{ opacity: 0, pointerEvents: 'none' }}>
+              <button 
+                className="equip-tab-action-btn" 
+                onClick={() => {
+                  setIsEditing(false)
+                  setEditedItem({ ...item })
+                }}
+              >
+                <span className="btn-text">Cancel</span>
+              </button>
+              <button 
+                className="equip-tab-action-btn" 
+                style={{ background: '#A0430A', color: '#DFE8E6' }}
+                onClick={handleSave}
+              >
+                <span className="btn-text">Save</span>
+              </button>
+            </div>
+          </div>
+          <ActionConfirmBtn 
+            actionText="Delete"
+            confirmText="Confirm?"
             onClick={handleDeleteWithAnim}
             disabled={isRemoving}
-          >
-            Delete
-          </button>
+          />
         </div>
       </div>
     </div>
@@ -234,6 +516,24 @@ export default function EquipmentTab({ onEquipmentChange }) {
     }
   }
 
+  const handleUpdate = async (id, details) => {
+    try {
+      const res = await fetch(`/api/equipment/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(details)
+      })
+      if (!res.ok) throw new Error('Failed to update equipment')
+      const updated = await res.json()
+      setEquipment(prev => prev.map(e => e.id === id ? updated : e))
+      if (onEquipmentChange) onEquipmentChange()
+      return true
+    } catch (err) {
+      alert(err.message)
+      return false
+    }
+  }
+
   const filteredEquipment = equipment.filter(item => 
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.serialNumber.toLowerCase().includes(searchQuery.toLowerCase())
@@ -345,6 +645,7 @@ export default function EquipmentTab({ onEquipmentChange }) {
               isExpanded={expandedId === item.id} 
               onToggle={id => setExpandedId(expandedId === id ? null : id)}
               onDelete={handleDelete}
+              onUpdate={handleUpdate}
             />
           ))}
         </div>

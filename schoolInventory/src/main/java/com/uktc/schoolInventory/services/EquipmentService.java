@@ -33,6 +33,10 @@ public class EquipmentService {
         equipment.setSerialNumber(details.getSerialNumber());
         equipment.setPhotoUrl(details.getPhotoUrl());
         equipment.setCurrentCondition(details.getCurrentCondition());
+        equipment.setStatus(details.getStatus());
+        equipment.setLocationId(details.getLocationId());
+        equipment.setAssignedTo(details.getAssignedTo());
+        equipment.setAssigned(details.getAssignedTo() != null && !details.getAssignedTo().isEmpty());
 
         return repository.save(equipment);
     }
@@ -46,7 +50,7 @@ public class EquipmentService {
                 .orElseThrow(() -> new RuntimeException("Equipment not found"));
 
         equipment.setAssigned(true);
-        equipment.setName(personName);
+        equipment.setAssignedTo(personName);
 
         return repository.save(equipment);
     }
