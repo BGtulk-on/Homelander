@@ -1,9 +1,20 @@
 package com.uktc.schoolInventory.controllers;
 
-import com.uktc.schoolInventory.models.Equipment;
-import com.uktc.schoolInventory.services.EquipmentService;
-import org.springframework.web.bind.annotation.*;
 import java.util.List;
+
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.uktc.schoolInventory.models.Equipment;
+import com.uktc.schoolInventory.models.EquipmentSearchRequest;
+import com.uktc.schoolInventory.services.EquipmentService;
 
 @RestController
 @RequestMapping("/api/equipment")
@@ -16,9 +27,20 @@ public class EquipmentController {
         this.service = service;
     }
 
-    @GetMapping
+    @PostMapping("/all")
     public List<Equipment> getAll() {
         return service.getAllEquipment();
+    }
+
+    @PostMapping("/search")
+    public List<Equipment> search(@RequestBody EquipmentSearchRequest searchRequest) {
+        return service.searchEquipment(
+                searchRequest.getName(),
+                searchRequest.getCondition(),
+                searchRequest.getStatus(),
+                searchRequest.getTypeName(),
+                searchRequest.getLocationName()
+        );
     }
 
     @PostMapping

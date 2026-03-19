@@ -2,10 +2,14 @@ package com.uktc.schoolInventory.services;
 
 import java.util.List;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.uktc.schoolInventory.models.Equipment;
+import com.uktc.schoolInventory.models.EquipmentCondition;
+import com.uktc.schoolInventory.models.EquipmentStatus;
 import com.uktc.schoolInventory.repositories.EquipmentRepository;
+import com.uktc.schoolInventory.specifications.EquipmentSpecification;
 
 @Service
 public class EquipmentService {
@@ -46,8 +50,30 @@ public class EquipmentService {
                 .orElseThrow(() -> new RuntimeException("Equipment not found"));
 
         equipment.setAssigned(true);
-        equipment.setName(personName);
+        equipment.setAssignedTo(personName);
 
         return repository.save(equipment);
+    }
+
+    public List<Equipment> searchEquipment(String name, EquipmentCondition condition, EquipmentStatus status, String typeName, String locationName) {
+        Specification<Equipment> spec = (root, query, cb) -> cb.conjunction();
+
+        if (name != null && !name.isBlank()) {
+            spec = spec.and(EquipmentSpecification.hasNameLike(name));
+        }
+        if (condition != null) {
+            spec = spec.and(EquipmentSpecification.hasCondition(condition));
+        }
+        if (status != null) {
+            spec = spec.and(EquipmentSpecification.hasStatus(status));
+        }
+        if (typeName != null && !typeName.isBlank()) {
+            spec = spec.and(EquipmentSpecification.hasTypeName(typeName));
+        }
+        if (locationName != null && !locationName.isBlank()) {
+            spec = spec.and(EquipmentSpecification.hasLocationName(locationName));
+        }
+
+        return repository.findAll(spec);
     }
 }

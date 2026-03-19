@@ -1,8 +1,22 @@
 package com.uktc.schoolInventory.models;
 
-import jakarta.persistence.*;
-import lombok.Data;
 import java.time.OffsetDateTime;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.uktc.schoolInventory.config.EquipmentConditionConverter;
+import com.uktc.schoolInventory.config.EquipmentStatusConverter;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Data;
 
 @Entity
 @Table(name = "equipment")
@@ -20,20 +34,30 @@ public class Equipment {
     @Column(name = "type_id")
     private Integer typeId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "type_id", insertable = false, updatable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private EquipmentType type;
+
     @Column(name = "serial_number", unique = true, nullable = false)
     private String serialNumber;
 
-    @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "equipment_status")
+    @Convert(converter = EquipmentStatusConverter.class)
+    @Column(name = "status")
     private EquipmentStatus status = EquipmentStatus.Available;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "current_condition", columnDefinition = "equipment_condition")
+    @Convert(converter = EquipmentConditionConverter.class)
+    @Column(name = "current_condition")
     private EquipmentCondition currentCondition;
 
     // Връзка към таблица locations
     @Column(name = "location_id")
     private Integer locationId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location_id", insertable = false, updatable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Location location;
 
     @Column(name = "photo_url")
     private String photoUrl;

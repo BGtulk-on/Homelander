@@ -1,9 +1,17 @@
 package com.uktc.schoolInventory.models;
 
-import jakarta.persistence.*;
-import lombok.Data;
-
 import java.time.OffsetDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import lombok.Data;
 
 @Entity
 @Table(name = "requests")
@@ -35,7 +43,6 @@ public class Request {
     @Column(name = "actual_return_date")
     private OffsetDateTime actualReturnDate;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "return_condition")
     private EquipmentCondition returnCondition;
 
