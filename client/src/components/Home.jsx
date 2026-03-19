@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useLayoutEffect } from 'react'
 import gsap from 'gsap'
 import UsersTab from './UsersTab'
+import EquipmentTab from './EquipmentTab'
+import RoomsTab from './RoomsTab'
 import './Home.css'
 
 export default function Home({ userRole, onLogout }) {
@@ -9,9 +11,14 @@ export default function Home({ userRole, onLogout }) {
   const [isUsersAnimating, setIsUsersAnimating] = useState(false)
   const [isEquipmentAnimating, setIsEquipmentAnimating] = useState(false)
   const [isRequestsAnimating, setIsRequestsAnimating] = useState(false)
-  const [activeTab, setActiveTab] = useState(null)
+  const [activeTab, setActiveTab] = useState('equipment')
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
 
-  useEffect(() => {
+  const handleEquipmentChange = () => {
+    setRefreshTrigger(prev => prev + 1)
+  }
+
+  useLayoutEffect(() => {
     gsap.fromTo(contentRef.current,
       { opacity: 0, x: 20 },
       { opacity: 1, x: 0, duration: 1, delay: 0.2, ease: 'power3.out' }
@@ -48,6 +55,7 @@ export default function Home({ userRole, onLogout }) {
   const triggerEquipmentAnimation = () => {
     if (isEquipmentAnimating) return
     setIsEquipmentAnimating(true)
+    setActiveTab('equipment')
     setTimeout(() => setIsEquipmentAnimating(false), 800)
   }
 
@@ -62,7 +70,7 @@ export default function Home({ userRole, onLogout }) {
       {userRole === 'admin' && (
         <aside className="home-sidebar">
           <div className="home-sidebar-content">
-            {activeTab === 'users' && <UsersTab />}
+            {activeTab === 'users' ? <UsersTab /> : <EquipmentTab onEquipmentChange={handleEquipmentChange} />}
           </div>
           
           <nav className="home-nav-bottom" ref={navRef}>
@@ -138,7 +146,8 @@ export default function Home({ userRole, onLogout }) {
           </nav>
         </aside>
       )}
-      <div className={`home-dashboard-area ${activeTab === 'users' ? 'no-padding' : ''}`} ref={contentRef}>
+      <div className="home-dashboard-area" ref={contentRef}>
+        <RoomsTab refreshTrigger={refreshTrigger} />
       </div>
     </div>
   )

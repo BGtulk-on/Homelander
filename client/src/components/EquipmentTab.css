@@ -1,0 +1,228 @@
+.equip-tab-container {
+  width: 90%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.equip-tab-search-wrapper {
+  margin-bottom: 0.35rem;
+  padding: 0 2px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.equip-tab-search {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  background: transparent;
+  border: 2.5px solid #A0430A;
+  border-radius: 6px;
+  color: #A0430A;
+  font-family: 'Clash Grotesk', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 500;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.equip-tab-search::placeholder {
+  color: #A0430A;
+}
+
+/* Add New Equipment Bubble */
+.equip-tab-add-wrapper {
+  margin-bottom: 0.35rem;
+  padding: 0 2px;
+}
+
+.equip-tab-add-toggle {
+  width: 100%;
+  background: transparent;
+  border: 2.5px solid #A0430A;
+  border-radius: 16px;
+  padding: 0.6rem 1.2rem;
+  color: #A0430A;
+  font-family: 'Clash Grotesk', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.equip-tab-add-toggle:hover {
+  background-color: rgba(160, 67, 10, 0.05);
+}
+
+.equip-tab-add-toggle.active {
+  background-color: transparent;
+  color: #A0430A;
+}
+
+.plus-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.equip-tab-add-form-container {
+  border: 1.5px solid #A0430A;
+  border-radius: 8px;
+  margin-top: 5px;
+  padding: 0 1rem;
+}
+
+.equip-tab-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.equip-tab-add-form input,
+.equip-tab-add-form select {
+  background: transparent;
+  border: 1.5px solid #A0430A;
+  padding: 0.6rem;
+  border-radius: 4px;
+  color: #A0430A;
+  font-family: 'Clash Grotesk', sans-serif;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.equip-tab-form-row {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.equip-tab-add-form input::placeholder {
+  color: #A0430A;
+}
+
+.equip-tab-add-form input:focus,
+.equip-tab-add-form select:focus {
+  background: rgba(160, 67, 10, 0.03);
+}
+
+.equip-tab-submit-btn {
+  background: transparent;
+  color: #A0430A;
+  border: 1.5px solid #A0430A;
+  padding: 0.6rem;
+  border-radius: 4px;
+  font-family: 'Clash Grotesk', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+}
+
+.equip-tab-submit-btn:hover {
+  background: #A0430A;
+  color: #DFE8E6;
+}
+
+/* List Items */
+.equip-tab-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+  padding: 0 2px 2rem 2px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+.equip-tab-list::-webkit-scrollbar {
+  display: none;
+}
+
+.equip-tab-item-box {
+  width: 100%;
+  box-sizing: border-box;
+  border: 2.5px solid #A0430A;
+  border-radius: 4px;
+  background: transparent;
+  transition: background-color 0.2s ease;
+}
+
+.equip-tab-item-box:first-child { border-radius: 16px 16px 4px 4px; }
+.equip-tab-item-box:last-child { border-radius: 4px 4px 16px 16px; }
+.equip-tab-item-box:first-child:last-child { border-radius: 16px; }
+
+.equip-tab-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  color: #A0430A;
+  font-family: 'Clash Grotesk', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 500;
+}
+
+.equip-tab-item-header:hover {
+  background-color: rgba(160, 67, 10, 0.05);
+}
+
+.equip-tab-icon {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
+}
+
+.equip-tab-icon.expanded {
+  transform: rotate(180deg);
+}
+
+.equip-tab-item-body {
+  padding: 0 1rem;
+}
+
+.equip-tab-body-info {
+  font-size: 0.9rem;
+  margin-bottom: 0.8rem;
+}
+
+.equip-tab-body-info p {
+  margin: 0.3rem 0;
+}
+
+.equip-tab-actions {
+  display: flex;
+  padding-bottom: 0.8rem;
+}
+
+.equip-tab-action-btn {
+  background: transparent;
+  border: 1.5px solid #A0430A;
+  color: #A0430A;
+  padding: 0.3rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Clash Grotesk', sans-serif;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+
+.equip-tab-action-btn:hover {
+  background: #A0430A;
+  color: #DFE8E6;
+}
+
+.equip-tab-loading, .equip-tab-error {
+  padding: 1rem;
+  color: #A0430A;
+}

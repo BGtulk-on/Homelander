@@ -176,16 +176,20 @@ function UserItem({ user, isExpanded, onToggle, onMakeAdmin, onApprove, onDelete
         ref={bodyRef}
         style={{ overflow: 'hidden' }}
       >
-        <div className="users-tab-body-header">
-          <p className="users-tab-email">{user.email}</p>
+        <div className="users-tab-body-info">
+          <p>{user.email}</p>
+          <p>{user.phone || 'No phone provided'}</p>
+          <p>{user.address || 'No address provided'}</p>
           {user.isAdmin && (
-            <span 
-              className="users-tab-badge-admin" 
-              ref={badgeRef}
-              style={{ display: 'inline-flex', opacity: 0 }}
-            >
-              Admin
-            </span>
+            <div style={{ marginTop: '0.4rem' }}>
+              <span 
+                className="users-tab-badge-admin" 
+                ref={badgeRef}
+                style={{ display: 'inline-flex', opacity: 0 }}
+              >
+                Admin
+              </span>
+            </div>
           )}
         </div>
         
@@ -252,13 +256,13 @@ export default function UsersTab() {
     fetchUsers()
   }, [])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isLoading && users.length > 0 && listRef.current && !hasAnimatedInRef.current) {
       hasAnimatedInRef.current = true
       const items = listRef.current.querySelectorAll('.users-tab-item-box')
       gsap.fromTo(items, 
-        { opacity: 0, x: -10 },
-        { opacity: 1, x: 0, duration: 0.3, stagger: 0.04, ease: 'power2.out' }
+        { opacity: 0, y: 15 },
+        { opacity: 1, y: 0, duration: 0.3, stagger: 0.04, ease: 'power2.out' }
       )
     }
   }, [isLoading, users])
@@ -310,7 +314,7 @@ export default function UsersTab() {
         <input 
           type="text" 
           className="users-tab-search" 
-          placeholder="search" 
+          placeholder="search users" 
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />

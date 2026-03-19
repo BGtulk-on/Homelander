@@ -1,0 +1,153 @@
+.rooms-tab-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.rooms-title {
+  color: var(--burnt-copper);
+  font-size: 1.8rem;
+  font-weight: 500;
+  margin-bottom: 2rem;
+  margin-top: 0;
+}
+
+.rooms-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.room-card {
+  width: 100%;
+  border: 1.5px solid var(--burnt-copper);
+  border-radius: 4px;
+  overflow: hidden;
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.room-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.room-card-header:hover {
+  background-color: rgba(160, 67, 10, 0.03);
+}
+
+.room-label {
+  display: flex;
+  align-items: baseline;
+  gap: 0.8rem;
+}
+
+.room-text {
+  font-size: 3.2rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.room-number {
+  font-size: 3.2rem;
+  font-weight: 800;
+}
+
+.room-stats {
+  font-size: 1.3rem;
+  font-weight: 700;
+  opacity: 0.9;
+}
+
+.room-card-content {
+  border-top: 1.5px solid var(--burnt-copper);
+  padding: 0;
+}
+
+.equipment-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.equipment-table tr {
+  border-bottom: 1.5px solid var(--burnt-copper);
+}
+
+.equipment-table tr:last-child {
+  border-bottom: none;
+}
+
+.equipment-table td {
+  padding: 0.6rem 1.5rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.eq-type {
+  width: 25%;
+}
+
+.eq-model {
+  width: 50%;
+}
+
+.eq-status {
+  width: 25%;
+  text-align: right;
+}
+
+.placeholder-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.8rem 1.5rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.equipment-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.equipment-row:hover {
+  background-color: rgba(160, 67, 10, 0.05);
+}
+
+.equipment-row.active {
+  background-color: rgba(160, 67, 10, 0.08);
+}
+
+.equipment-details {
+  background-color: rgba(160, 67, 10, 0.02);
+  border-bottom: 1.5px solid rgba(160, 67, 10, 0.2);
+}
+
+.details-content {
+  padding: 1.5rem 2rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.detail-item {
+  font-size: 1.15rem;
+  color: var(--burnt-copper);
+}
+
+.detail-item strong {
+  text-transform: uppercase;
+  font-size: 1rem;
+  opacity: 0.8;
+  margin-right: 0.5rem;
+}
+
+/* Specific Room 4 styling from image */
+.room-card.expanded {
+  background-color: transparent;
+}
