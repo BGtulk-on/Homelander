@@ -1,11 +1,13 @@
 package com.uktc.schoolInventory.services;
 
+import org.springframework.stereotype.Service;
+
+import com.uktc.schoolInventory.exception.ResourceNotFoundException;
 import com.uktc.schoolInventory.models.Request;
 import com.uktc.schoolInventory.models.RequestStatusType;
+import com.uktc.schoolInventory.repositories.EquipmentRepository;
 import com.uktc.schoolInventory.repositories.RequestRepository;
-import com.uktc.schoolInventory.repositories.UserRepository; // Добави този импорт
-import com.uktc.schoolInventory.repositories.EquipmentRepository; // Добави този импорт
-import org.springframework.stereotype.Service;
+import com.uktc.schoolInventory.repositories.UserRepository;
 
 @Service
 public class RequestService {
@@ -28,11 +30,11 @@ public class RequestService {
     public Request createRequest(Request request) {
         // 1. Изваждаме истинския потребител от базата по ID-то от JSON-а
         var user = userRepository.findById(request.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("Потребителят не е намерен!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + request.getUser().getId()));
 
-        // 2. Изваждаме истинската техника от базата
+        // 2. Fetch the equipment from the database
         var equipment = equipmentRepository.findById(request.getEquipment().getId())
-                .orElseThrow(() -> new RuntimeException("Техниката не е намерена!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Equipment not found with id: " + request.getEquipment().getId()));
         System.out.println("DEBUG: Опитвам се да запиша заявка за техника: " + equipment.getName());
 
         // 3. Свързваме ги с текущата заявка

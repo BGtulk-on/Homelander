@@ -2,6 +2,9 @@ package com.uktc.schoolInventory.services;
 
 import com.uktc.schoolInventory.dto.UserLoginDto;
 import com.uktc.schoolInventory.dto.UserRegisterDto;
+import com.uktc.schoolInventory.exception.BadRequestException;
+import com.uktc.schoolInventory.exception.DuplicateResourceException;
+import com.uktc.schoolInventory.exception.ResourceNotFoundException;
 import com.uktc.schoolInventory.models.User;
 import com.uktc.schoolInventory.repositories.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,8 +31,8 @@ public class AuthService {
     }
 
     public User register(UserRegisterDto input){
-        if(userRepository.findUserByEmail(input.getEmail()).isPresent()) {
-            throw new RuntimeException("A user with this email alrady exists");
+        if (userRepository.findUserByEmail(input.getEmail()).isPresent()) {
+            throw new DuplicateResourceException("A user with this email already exists");
         }
         User user = new User();
         user.setFirstName(input.getFirst_name());
@@ -44,10 +47,10 @@ public class AuthService {
 
     public User authenticate(UserLoginDto input){
         User user = userRepository.findUserByEmail(input.getEmail())
-                .orElseThrow(() -> new RuntimeException("User was not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("No account found with that email address"));
 
-        if(!passwordEncoder.matches(input.getPassword(), user.getPasswordHash())){
-            throw new RuntimeException("Password or email is incorect");
+        if (!passwordEncoder.matches(input.getPassword(), user.getPasswordHash())) {
+            throw new BadRequestException("Incorrect email or password");
         }
 
         return user;

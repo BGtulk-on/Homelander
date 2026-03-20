@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.uktc.schoolInventory.exception.ResourceNotFoundException;
 import com.uktc.schoolInventory.models.Equipment;
 import com.uktc.schoolInventory.models.EquipmentCondition;
 import com.uktc.schoolInventory.models.EquipmentStatus;
@@ -30,7 +31,7 @@ public class EquipmentService {
 
     public Equipment updateEquipment(Long id, Equipment details) {
         Equipment equipment = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Equipment not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Equipment not found with id: " + id));
 
         equipment.setName(details.getName());
         equipment.setTypeId(details.getTypeId());
@@ -51,7 +52,7 @@ public class EquipmentService {
 
     public Equipment assignEquipment(Long id, String personName) {
         Equipment equipment = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Equipment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Equipment not found with id: " + id));
 
         equipment.setAssigned(true);
         equipment.setAssignedTo(personName);
