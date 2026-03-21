@@ -27,6 +27,9 @@ public class User {
     @Column(name = "isadmin")
     private Boolean isAdmin = false;
 
+    @Column(name = "approved")
+    private Boolean approved = false;
+
     @Column(name = "created_at")
     private OffsetDateTime createdAt = OffsetDateTime.now();
 }
