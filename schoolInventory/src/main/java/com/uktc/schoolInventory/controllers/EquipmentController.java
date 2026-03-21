@@ -3,6 +3,7 @@ package com.uktc.schoolInventory.controllers;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,7 +23,6 @@ public class EquipmentController {
 
     private final EquipmentService service;
 
-    // Инжектираме Service-а вместо Repository-то
     public EquipmentController(EquipmentService service) {
         this.service = service;
     }
@@ -61,5 +61,10 @@ public class EquipmentController {
     @PatchMapping("/{id}/assign")
     public Equipment assign(@PathVariable Long id, @RequestParam String personName) {
         return service.assignEquipment(id, personName);
+    }
+
+    @GetMapping("/low-stock")
+    public List<Equipment> getLowStock() {
+        return service.getLowStockEquipment();
     }
 }

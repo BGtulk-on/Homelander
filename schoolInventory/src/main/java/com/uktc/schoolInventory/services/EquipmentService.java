@@ -2,6 +2,7 @@ package com.uktc.schoolInventory.services;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,9 @@ import com.uktc.schoolInventory.specifications.EquipmentSpecification;
 public class EquipmentService {
 
     private final EquipmentRepository repository;
+
+    @Value("${inventory.low-stock.threshold}")
+    private int lowStockThreshold;
 
     public EquipmentService(EquipmentRepository repository) {
         this.repository = repository;
@@ -80,5 +84,9 @@ public class EquipmentService {
         }
 
         return repository.findAll(spec);
+    }
+
+    public List<Equipment> getLowStockEquipment() {
+        return repository.findLowStockEquipment(lowStockThreshold);
     }
 }
