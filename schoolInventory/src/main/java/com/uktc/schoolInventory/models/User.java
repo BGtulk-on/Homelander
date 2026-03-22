@@ -1,5 +1,6 @@
 package com.uktc.schoolInventory.models;
 
+import com.uktc.schoolInventory.controllers.user.Role;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.OffsetDateTime;
@@ -24,8 +25,9 @@ public class User {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @Column(name = "isadmin")
-    private Boolean isAdmin = false;
+    @Enumerated
+    @Column(name = "role", nullable = false)
+    private Role role;
 
     @Column(name = "approved")
     private Boolean approved = false;

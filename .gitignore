@@ -11,3 +11,5 @@ schoolInventory/reports/
 
 # Build artifacts
 schoolInventory/bin/
+.idea
+.idea/**/*
