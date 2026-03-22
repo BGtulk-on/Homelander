@@ -1,5 +1,6 @@
 package com.uktc.schoolInventory.services;
 
+import com.uktc.schoolInventory.controllers.user.Role;
 import com.uktc.schoolInventory.dto.UserLoginDto;
 import com.uktc.schoolInventory.dto.UserRegisterDto;
 import com.uktc.schoolInventory.exception.BadRequestException;
@@ -8,16 +9,17 @@ import com.uktc.schoolInventory.exception.ResourceNotFoundException;
 import com.uktc.schoolInventory.models.User;
 import com.uktc.schoolInventory.repositories.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
 @Service
 public class AuthService {
-    private UserRepository userRepository;
-    private UserService userService;
-    private PasswordEncoder passwordEncoder;
-    private AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
+    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
 
     public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
@@ -39,22 +41,22 @@ public class AuthService {
         user.setLastName(input.getLast_name());
         user.setEmail(input.getEmail());
         user.setPasswordHash(passwordEncoder.encode(input.getPassword()));
-        user.setIsAdmin(false);
+        user.setRole(Role.USER);
 
         return userRepository.save(user);
 
     }
 
     public User authenticate(UserLoginDto input){
-        User user = userRepository.findUserByEmail(input.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException("No account found with that email address"));
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(input.getEmail(), input.getPassword())
+        );
 
-        if (!passwordEncoder.matches(input.getPassword(), user.getPasswordHash())) {
-            throw new BadRequestException("Incorrect email or password");
+        return userRepository.findUserByEmail(input.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with that email"));
+
         }
 
-        return user;
-    }
 }
 
 
