@@ -20,6 +20,21 @@ public class EquipmentSpecification {
                 cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%");
     }
 
+    public static Specification<Equipment> hasQuery(String q) {
+        return (root, query, cb) -> {
+            String pattern = "%" + q.toLowerCase() + "%";
+            return cb.or(
+                cb.like(cb.lower(root.get("name")), pattern),
+                cb.like(cb.lower(root.get("serialNumber")), pattern)
+            );
+        };
+    }
+
+    public static Specification<Equipment> hasSerialNumberLike(String serialNumber) {
+        return (root, query, cb) ->
+                cb.like(cb.lower(root.get("serialNumber")), "%" + serialNumber.toLowerCase() + "%");
+    }
+
     public static Specification<Equipment> hasCondition(EquipmentCondition condition) {
         String dbValue = new EquipmentConditionConverter().convertToDatabaseColumn(condition);
         return (root, query, cb) ->

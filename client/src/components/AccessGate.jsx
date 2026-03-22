@@ -42,17 +42,60 @@ export default function AccessGate({ onLogin, isExiting }) {
     setIsTyping(false)
   }
 
-  const handleSubmission = (e) => {
+  const handleSubmission = async (e) => {
     e.preventDefault()
     
-    if (wantsExistingAccess) {
-      if (formData.email === 'user@test.com' && formData.password === 'testpass') {
-        onLogin('user')
-      } else if (formData.email === 'admin@test.com' && formData.password === 'adminpass') {
-        onLogin('admin')
+    try {
+      if (wantsExistingAccess) {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password
+          })
+        })
+
+        if (!response.ok) {
+          let errorMessage = 'Invalid credentials'
+          try {
+            const errorJson = await response.json()
+            errorMessage = errorJson.message || errorMessage
+          } catch (e) {
+          }
+          throw new Error(errorMessage)
+        }
+
+        const data = await response.json()
+        onLogin(data)
       } else {
-        alert('Invalid credentials')
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            email: formData.email,
+            password: formData.password
+          })
+        })
+
+        if (!response.ok) {
+          let errorMessage = 'Registration failed'
+          try {
+            const errorJson = await response.json()
+            errorMessage = errorJson.message || errorMessage
+          } catch (e) {
+          }
+          throw new Error(errorMessage)
+        }
+
+        alert('Registration successful! You can now login.')
+        setWantsExistingAccess(true)
+        setIsTyping(false)
       }
+    } catch (err) {
+      alert(err.message)
     }
   }
 

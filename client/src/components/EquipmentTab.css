@@ -3,7 +3,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 0 1.5rem; /* Larger, fixed side space */
+  padding: 0 1.5rem;
   box-sizing: border-box;
 }
 
@@ -32,7 +32,6 @@
   color: #A0430A;
 }
 
-/* Add New Equipment Bubble */
 .equip-tab-add-wrapper {
   margin-bottom: 0.8rem;
   width: 100%;
@@ -109,7 +108,7 @@
   text-transform: uppercase;
   transition: all 0.2s ease;
   margin-bottom: 1rem;
-  width: 100%; /* Make it consistent with bottom buttons */
+  width: 100%;
 }
 
 .equip-tab-submit-btn:hover {
@@ -117,7 +116,6 @@
   color: #DFE8E6;
 }
 
-/* List Items */
 .equip-tab-list {
   display: flex;
   flex-direction: column;
@@ -128,8 +126,8 @@
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: none;
-  flex: 1; /* Take all remaining space */
-  min-height: 0; /* Important for flex-basis interaction with overflow */
+  flex: 1;
+  min-height: 0;
 }
 
 .equip-tab-list::-webkit-scrollbar {
@@ -140,7 +138,7 @@
   width: 100%;
   box-sizing: border-box;
   border: 2.5px solid #A0430A;
-  border-radius: 6px; /* Smaller base radius for middle items */
+  border-radius: 6px;
   background: rgba(255, 255, 255, 0.02);
   transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease;
   flex-shrink: 0;
@@ -270,7 +268,6 @@
   box-sizing: border-box;
 }
 
-/* Status Colors */
 .info-value.status-available { color: #2e7d32; }
 .info-value.status-checked-out { color: #ed6c02; }
 .info-value.status-under-repair { color: #d32f2f; }
@@ -353,6 +350,49 @@
 
 .edit-input:focus {
   background: rgba(160, 67, 10, 0.12);
+}
+
+.user-suggestions-box {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: #DFE8E6;
+  border: 2px solid #A0430A;
+  border-radius: 8px;
+  margin-top: 4px;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.user-suggestion-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid rgba(160, 67, 10, 0.1);
+}
+
+.user-suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.user-suggestion-item:hover {
+  background: rgba(160, 67, 10, 0.08);
+}
+
+.suggestion-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #A0430A;
+}
+
+.suggestion-email {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  color: #A0430A;
 }
 
 .equip-tab-action-btn {

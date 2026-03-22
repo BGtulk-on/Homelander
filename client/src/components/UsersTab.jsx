@@ -47,7 +47,7 @@ function ActionConfirmBtn({ actionText, confirmText, onClick, disabled }) {
   )
   }
 
-function UserItem({ user, isExpanded, onToggle, onMakeAdmin, onApprove, onDelete }) {
+function UserItem({ user, isExpanded, onToggle, onMakeAdmin, onApprove, onDelete, showActions }) {
   const bodyRef = useRef(null)
   const containerRef = useRef(null)
   const badgeRef = useRef(null)
@@ -218,41 +218,45 @@ function UserItem({ user, isExpanded, onToggle, onMakeAdmin, onApprove, onDelete
         </div>
         
         <div className="users-tab-actions">
-          {!user.isAdmin && (
-            <div 
-              className="make-admin-btn-wrapper" 
-              style={{ width: '100%', display: isPromoting ? 'none' : 'block' }}
-            >
+          {showActions && (
+            <>
+              {!user.isAdmin && (
+                <div 
+                  className="make-admin-btn-wrapper" 
+                  style={{ width: '100%', display: isPromoting ? 'none' : 'block' }}
+                >
+                  <ActionConfirmBtn 
+                    key={`admin-${user.id}`}
+                    actionText="Make Admin"
+                    confirmText="Confirm?"
+                    onClick={handleMakeAdminWithAnim}
+                  />
+                </div>
+              )}
+              
+              <button 
+                className="users-tab-action-btn" 
+                onClick={approveWithAnim}
+                disabled={isRemoving}
+              >
+                Approve
+              </button>
+              
               <ActionConfirmBtn 
-                key={`admin-${user.id}`}
-                actionText="Make Admin"
+                key={`delete-${user.id}`}
+                actionText="Delete"
                 confirmText="Confirm?"
-                onClick={handleMakeAdminWithAnim}
+                onClick={deleteWithAnim}
               />
-            </div>
+            </>
           )}
-          
-          <button 
-            className="users-tab-action-btn" 
-            onClick={approveWithAnim}
-            disabled={isRemoving}
-          >
-            Approve
-          </button>
-          
-          <ActionConfirmBtn 
-            key={`delete-${user.id}`}
-            actionText="Delete"
-            confirmText="Confirm?"
-            onClick={deleteWithAnim}
-          />
         </div>
       </div>
     </div>
   )
 }
 
-export default function UsersTab() {
+export default function UsersTab({ currentUser }) {
   const [users, setUsers] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -261,6 +265,8 @@ export default function UsersTab() {
   
   const listRef = useRef(null)
   const hasAnimatedInRef = useRef(false)
+
+  const isSuperUser = currentUser?.id === 1
 
   const fetchUsers = async () => {
     try {
@@ -293,7 +299,7 @@ export default function UsersTab() {
 
   const handleApprove = async (id) => {
     try {
-      const res = await fetch(`/api/users/${id}/approve?requesterId=1`, { method: 'PUT' })
+      const res = await fetch(`/api/users/${id}/approve?requesterId=${currentUser?.id}`, { method: 'PUT' })
       if (!res.ok) throw new Error('Failed to approve')
       setUsers(prev => prev.filter(u => u.id !== id))
     } catch (err) {
@@ -303,7 +309,7 @@ export default function UsersTab() {
 
   const handleMakeAdmin = async (id) => {
     try {
-      const res = await fetch(`/api/users/${id}/make-admin?requesterId=1`, { method: 'PUT' })
+      const res = await fetch(`/api/users/${id}/make-admin?requesterId=${currentUser?.id}`, { method: 'PUT' })
       if (!res.ok) throw new Error('Failed to make admin')
       
       setUsers(prev => prev.map(u => u.id === id ? { ...u, isAdmin: true } : u))
@@ -314,7 +320,7 @@ export default function UsersTab() {
 
   const handleDelete = async (id) => {
     try {
-      const res = await fetch(`/api/users/${id}?requesterId=1`, { method: 'DELETE' })
+      const res = await fetch(`/api/users/${id}?requesterId=${currentUser?.id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('Failed to delete user')
       setUsers(prev => prev.filter(u => u.id !== id))
     } catch (err) {
@@ -361,6 +367,7 @@ export default function UsersTab() {
               onMakeAdmin={handleMakeAdmin}
               onApprove={handleApprove}
               onDelete={handleDelete}
+              showActions={isSuperUser}
             />
           ))}
         </div>

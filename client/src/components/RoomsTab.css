@@ -129,11 +129,52 @@
   border-bottom: 1.5px solid rgba(160, 67, 10, 0.2);
 }
 
+.details-layout {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  padding: 0;
+  height: 140px;
+}
+
 .details-content {
-  padding: 1.5rem 2rem;
+  flex: 1;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
+  gap: 0.8rem 1.2rem;
+  padding: 1.2rem 1.8rem;
+  overflow-y: auto;
+}
+
+.rooms-equip-photo {
+  width: 200px;
+  border-left: 1.5px solid var(--burnt-copper);
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(160, 67, 10, 0.05);
+}
+
+.no-photo-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--burnt-copper);
+  opacity: 0.4;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+}
+
+.rooms-equip-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .detail-item {
@@ -148,7 +189,6 @@
   margin-right: 0.5rem;
 }
 
-/* Specific Room 4 styling from image */
 .room-card.expanded {
   background-color: transparent;
 }

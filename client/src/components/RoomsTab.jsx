@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import gsap from 'gsap'
+import ZoomableImage from './ZoomableImage'
 import './RoomsTab.css'
 
 const TYPE_NAMES = {
@@ -18,6 +19,11 @@ const LOCATION_NAMES = {
 
 function EquipmentItem({ item, isExpanded, onToggle }) {
   const detailsRef = useRef(null)
+  const [imgError, setImgError] = useState(false)
+
+  useEffect(() => {
+    setImgError(false)
+  }, [item.photoUrl])
 
   useEffect(() => {
     if (detailsRef.current) {
@@ -39,11 +45,26 @@ function EquipmentItem({ item, isExpanded, onToggle }) {
       <tr>
         <td colSpan="3" style={{ padding: 0 }}>
           <div ref={detailsRef} className="equipment-details" style={{ height: 0, opacity: 0, overflow: 'hidden' }}>
-            <div className="details-content">
-              <div className="detail-item"><strong>Serial:</strong> {item.serialNumber}</div>
-              <div className="detail-item"><strong>Condition:</strong> {(item.currentCondition || 'Unknown').replace('_', ' ')}</div>
-              <div className="detail-item"><strong>Assigned To:</strong> {item.assignedTo || 'Unassigned'}</div>
-              <div className="detail-item"><strong>Assigned:</strong> {item.assigned ? 'Yes' : 'No'}</div>
+            <div className="details-layout">
+              <div className="details-content">
+                <div className="detail-item"><strong>Serial:</strong> {item.serialNumber}</div>
+                <div className="detail-item"><strong>Condition:</strong> {(item.currentCondition || 'Unknown').replace('_', ' ')}</div>
+                <div className="detail-item"><strong>Assigned To:</strong> {item.assignedTo || 'Unassigned'}</div>
+                <div className="detail-item"><strong>Assigned:</strong> {item.assigned ? 'Yes' : 'No'}</div>
+              </div>
+              <div className="rooms-equip-photo">
+                {item.photoUrl && !imgError ? (
+                  <ZoomableImage 
+                    src={item.photoUrl} 
+                    alt={item.name} 
+                    onError={() => setImgError(true)}
+                  />
+                ) : (
+                  <div className="no-photo-placeholder">
+                    <span>NO IMAGE</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </td>
@@ -149,11 +170,10 @@ export default function RoomsTab({ refreshTrigger }) {
         if (!hasAnimatedInRef.current) {
           setIsLoading(true)
         }
-        const res = await fetch('/api/equipment')
+        const res = await fetch('/api/equipment/all', { method: 'POST' })
         if (!res.ok) throw new Error('Failed to fetch rooms data')
         const data = await res.json()
         
-        // Group by locationId
         const groups = {
           1: { id: 1, name: '1', items: [] },
           2: { id: 2, name: '2', items: [] },
@@ -162,7 +182,7 @@ export default function RoomsTab({ refreshTrigger }) {
         }
         
         data.forEach(item => {
-          const locId = item.locationId || 1 // Fallback to room 1 if missing
+          const locId = item.locationId || 1
           if (groups[locId]) {
             groups[locId].items.push(item)
           }

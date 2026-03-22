@@ -10,14 +10,14 @@ function App() {
   const dividerRef = useRef(null)
   const [appPhase, setAppPhase] = useState('GATE')
 
-  const handleLogin = (role) => {
-    if (role === 'admin') {
+  const handleLogin = (userData) => {
+    if (userData.isAdmin || userData.id === 1) {
       setIsTransitioning(true)
       setAppPhase('TRANSITION')
       
       const tl = gsap.timeline({
         onComplete: () => {
-          setUser(role)
+          setUser(userData)
           setAppPhase('HOME')
           setIsTransitioning(false)
         }
@@ -42,7 +42,7 @@ function App() {
         duration: 0.8,
         ease: 'power3.in',
         onComplete: () => {
-          setUser(role)
+          setUser(userData)
           setAppPhase('HOME')
           setIsTransitioning(false)
         }
@@ -50,7 +50,12 @@ function App() {
     }
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' })
+    } catch (err) {
+      console.error('Logout error:', err)
+    }
     setUser(null)
     setAppPhase('GATE')
     gsap.set(dividerRef.current, { height: '60vh', left: '50%', opacity: 1 })
@@ -68,7 +73,7 @@ function App() {
       )}
       
       {appPhase === 'HOME' && (
-        <Home userRole={user} onLogout={handleLogout} />
+        <Home user={user} onLogout={handleLogout} />
       )}
     </main>
   )

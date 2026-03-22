@@ -35,7 +35,9 @@ public class EquipmentController {
     @PostMapping("/search")
     public List<Equipment> search(@RequestBody EquipmentSearchRequest searchRequest) {
         return service.searchEquipment(
+                searchRequest.getQuery(),
                 searchRequest.getName(),
+                searchRequest.getSerialNumber(),
                 searchRequest.getCondition(),
                 searchRequest.getStatus(),
                 searchRequest.getTypeName(),

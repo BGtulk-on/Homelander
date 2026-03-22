@@ -64,11 +64,17 @@ public class EquipmentService {
         return repository.save(equipment);
     }
 
-    public List<Equipment> searchEquipment(String name, EquipmentCondition condition, EquipmentStatus status, String typeName, String locationName) {
-        Specification<Equipment> spec = (root, query, cb) -> cb.conjunction();
+    public List<Equipment> searchEquipment(String query, String name, String serialNumber, EquipmentCondition condition, EquipmentStatus status, String typeName, String locationName) {
+        Specification<Equipment> spec = (root, q, cb) -> cb.conjunction();
 
+        if (query != null && !query.isBlank()) {
+            spec = spec.and(EquipmentSpecification.hasQuery(query));
+        }
         if (name != null && !name.isBlank()) {
             spec = spec.and(EquipmentSpecification.hasNameLike(name));
+        }
+        if (serialNumber != null && !serialNumber.isBlank()) {
+            spec = spec.and(EquipmentSpecification.hasSerialNumberLike(serialNumber));
         }
         if (condition != null) {
             spec = spec.and(EquipmentSpecification.hasCondition(condition));

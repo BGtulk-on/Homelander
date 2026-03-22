@@ -59,7 +59,7 @@ public class Equipment {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Location location;
 
-    @Column(name = "photo_url")
+    @Column(name = "photo_url", length = 1000)
     private String photoUrl;
 
     @Column(name = "is_assigned")

@@ -5,7 +5,7 @@ import EquipmentTab from './EquipmentTab'
 import RoomsTab from './RoomsTab'
 import './Home.css'
 
-export default function Home({ userRole, onLogout }) {
+export default function Home({ user, onLogout }) {
   const contentRef = useRef(null)
   const navRef = useRef(null)
   const [isUsersAnimating, setIsUsersAnimating] = useState(false)
@@ -67,10 +67,10 @@ export default function Home({ userRole, onLogout }) {
 
   return (
     <div className="home-wrapper">
-      {userRole === 'admin' && (
+      {(user?.isAdmin || user?.id === 1) && (
         <aside className="home-sidebar">
           <div className="home-sidebar-content">
-            {activeTab === 'users' ? <UsersTab /> : <EquipmentTab onEquipmentChange={handleEquipmentChange} />}
+            {activeTab === 'users' ? <UsersTab currentUser={user} /> : <EquipmentTab onEquipmentChange={handleEquipmentChange} />}
           </div>
           
           <nav className="home-nav-bottom" ref={navRef}>
