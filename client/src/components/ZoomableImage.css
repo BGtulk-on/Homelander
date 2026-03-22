@@ -4,7 +4,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(223, 232, 230, 0.95); /* Sea-mist background */
+  background: rgba(223, 232, 230, 0.95);
   z-index: 9999;
   display: flex;
   justify-content: center;
@@ -30,7 +30,6 @@
 }
 
 .zoomable-close-btn {
-  /* Matching gate-submit style */
   width: 90%;
   max-width: 1000px;
   background-color: var(--accent-color);
@@ -42,7 +41,7 @@
   letter-spacing: 1px;
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
-  
+
   position: fixed;
   bottom: 5vh;
   left: 50%;
