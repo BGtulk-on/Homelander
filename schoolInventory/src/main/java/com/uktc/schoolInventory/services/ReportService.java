@@ -1,6 +1,7 @@
 package com.uktc.schoolInventory.services;
 
 import com.uktc.schoolInventory.dto.ReportRowDto;
+import com.uktc.schoolInventory.models.EquipmentCondition;
 import com.uktc.schoolInventory.models.Request;
 import com.uktc.schoolInventory.models.Report;
 import com.uktc.schoolInventory.models.User;
@@ -28,7 +29,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class ReportService {
@@ -60,30 +60,32 @@ public class ReportService {
     }
 
     public Map<String, Object> getUsageReport() {
-        List<Request> all = requestRepository.findAllReturnedForReports();
-        long totalReturns = all.size();
+        List<Request> all = requestRepository.findAll();
+        long totalRequest = all.size();
         long uniqueUsers = all.stream().map(r -> r.getUser().getId()).distinct().count();
         long uniqueEquipment = all.stream().map(r -> r.getEquipment().getId()).distinct().count();
+        long poorConditionEquipment =
+                all.stream().filter(
+            r -> r.getEquipment()
+                          .getCurrentCondition()
+                          .equals(EquipmentCondition.POOR)
+                ).distinct().count();
 
         return Map.of(
-            "totalReturnedRequests", totalReturns,
+            "totalReturnedRequests", totalRequest,
             "uniqueUsers", uniqueUsers,
-            "uniqueEquipment", uniqueEquipment
+            "uniqueEquipment", uniqueEquipment,
+            "poorConditionEquipment", poorConditionEquipment
         );
     }
 
     public Map<String, Object> getHistoryReport() {
-        List<ReportRowDto> rows = buildReportRowsFromRequests(requestRepository.findAllReturnedForReports());
+        List<ReportRowDto> rows = buildReportRowsFromRequests(requestRepository.findAll());
         return Map.of("history", rows);
     }
 
-    public List<ReportRowDto> getUserReport() {
-        List<Request> returned = requestRepository.findAllReturnedForReports();
-        return buildReportRowsFromRequests(returned);
-    }
-
-    public List<ReportRowDto> getEquipmentReport() {
-        List<Request> returned = requestRepository.findAllReturnedForReports();
+    public List<ReportRowDto> getAllReport() {
+        List<Request> returned = requestRepository.findAll();
         return buildReportRowsFromRequests(returned);
     }
 
@@ -92,17 +94,17 @@ public class ReportService {
         for (Request r : requests) {
             User user = r.getUser();
             Equipment equip = r.getEquipment();
-            
+
             if (user != null && equip != null) {
                 String userName = user.getFirstName() + " " + (user.getLastName() != null ? user.getLastName() : "").trim();
                 String userEmail = user.getEmail();
                 String eqName = equip.getName();
                 String eqType = equip.getType() != null ? equip.getType().getTypeName() : (equip.getTypeId() != null ? "Type " + equip.getTypeId() : "");
                 String serial = equip.getSerialNumber() != null ? equip.getSerialNumber() : "";
-                
+
                 rows.add(ReportRowDto.forUserReport(userName, userEmail, eqName, eqType, serial,
-                        convertToLocalDateTime(r.getCreatedAt()), convertToLocalDateTime(r.getRequestedEndDate()), 
-                        convertToLocalDateTime(r.getActualReturnDate()), 
+                        convertToLocalDateTime(r.getCreatedAt()), convertToLocalDateTime(r.getRequestedEndDate()),
+                        convertToLocalDateTime(r.getActualReturnDate()),
                         r.getReturnCondition() != null ? r.getReturnCondition().toString() : ""));
             }
         }
@@ -110,7 +112,7 @@ public class ReportService {
     }
 
     public byte[] exportCsv(String type) throws IOException {
-        List<ReportRowDto> rows = "equipment".equalsIgnoreCase(type) ? getEquipmentReport() : getUserReport();
+        List<ReportRowDto> rows = getAllReport();
         String[] headers = type.equalsIgnoreCase("equipment")
                 ? new String[]{"Equipment Name", "Type", "Serial", "Requested By", "User Email", "Requested At", "Return Deadline", "Actual Return", "Condition"}
                 : new String[]{"User Name", "User Email", "Equipment", "Type", "Serial", "Requested At", "Return Deadline", "Actual Return", "Condition"};
@@ -136,8 +138,8 @@ public class ReportService {
         return sw.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
     }
 
-    public byte[] exportPdf(String type) throws DocumentException, IOException {
-        List<ReportRowDto> rows = "equipment".equalsIgnoreCase(type) ? getEquipmentReport() : getUserReport();
+    public byte[] exportPdf(String type) throws DocumentException {
+        List<ReportRowDto> rows = getAllReport();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Document document = new Document(PageSize.A4.rotate());
         PdfWriter.getInstance(document, out);
