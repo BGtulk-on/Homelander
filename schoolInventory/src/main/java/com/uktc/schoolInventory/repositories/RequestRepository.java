@@ -1,13 +1,16 @@
 package com.uktc.schoolInventory.repositories;
 
-import com.uktc.schoolInventory.models.RequestStatusType;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.uktc.schoolInventory.models.Request;
-
-import java.util.List;
+import com.uktc.schoolInventory.models.RequestStatusType;
 
 public interface RequestRepository extends JpaRepository<Request, Long> {
-    // Намираме всички одобрени заявки
     List<Request> findAllByRequestStatus(RequestStatusType status);
+
+    List<Request> findByUserIdAndRequestStatus(Long userId, RequestStatusType status);
+
+    List<Request> findByEquipmentIdAndRequestStatus(Long equipmentId, RequestStatusType status);
 }

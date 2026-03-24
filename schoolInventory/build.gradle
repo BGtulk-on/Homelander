@@ -24,9 +24,15 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-mail' // ДОБАВИ ТОВА ЕТО ТУК
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // ТОВА ЛИПСВАШЕ
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
 	// Драйвер за PostgreSQL
 	runtimeOnly 'org.postgresql:postgresql'
+
+	// PDF export
+	implementation 'com.github.librepdf:openpdf:2.0.3'
+	// CSV export
+	implementation 'org.apache.commons:commons-csv:1.11.0'
 
 	// Lombok (за да изчезне червеното на @Data)
 	compileOnly 'org.projectlombok:lombok'

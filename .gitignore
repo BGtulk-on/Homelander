@@ -3,3 +3,11 @@
 client/node_modules
 client/dist
 client/.vite
+
+# Generated reports and test outputs
+schoolInventory/*.pdf
+schoolInventory/*.csv
+schoolInventory/reports/
+
+# Build artifacts
+schoolInventory/bin/
