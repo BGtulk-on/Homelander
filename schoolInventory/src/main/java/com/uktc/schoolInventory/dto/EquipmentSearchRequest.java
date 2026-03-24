@@ -1,5 +1,7 @@
-package com.uktc.schoolInventory.models;
+package com.uktc.schoolInventory.dto;
 
+import com.uktc.schoolInventory.models.EquipmentCondition;
+import com.uktc.schoolInventory.models.EquipmentStatus;
 import lombok.Data;
 
 @Data

@@ -2,7 +2,20 @@ package com.uktc.schoolInventory.models;
 
 import java.time.OffsetDateTime;
 
-import jakarta.persistence.*;
+import com.uktc.schoolInventory.config.EquipmentConditionConverter;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
@@ -37,6 +50,7 @@ public class Request {
     @Column(name = "actual_return_date")
     private OffsetDateTime actualReturnDate;
 
+    @Convert(converter = EquipmentConditionConverter.class)
     @Column(name = "return_condition")
     private EquipmentCondition returnCondition;
 

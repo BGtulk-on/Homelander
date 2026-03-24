@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uktc.schoolInventory.models.Equipment;
-import com.uktc.schoolInventory.models.EquipmentSearchRequest;
+import com.uktc.schoolInventory.dto.EquipmentSearchRequest;
 import com.uktc.schoolInventory.services.EquipmentService;
 
 @RestController

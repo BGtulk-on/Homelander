@@ -3,6 +3,8 @@ package com.uktc.schoolInventory.services;
 import com.uktc.schoolInventory.models.Request;
 import com.uktc.schoolInventory.models.RequestStatusType;
 import com.uktc.schoolInventory.repositories.RequestRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +13,7 @@ import java.util.List;
 
 @Service
 public class OverdueTaskService {
+    private static final Logger log = LoggerFactory.getLogger(OverdueTaskService.class);
 
     private final RequestRepository repository;
     private final EmailService emailService;
@@ -41,10 +44,9 @@ public class OverdueTaskService {
                     );
 
                     // Лог в конзолата, за да знаеш, че системата е свършила работа
-                    System.out.println("✅ Изпратено напомняне до: " + req.getUser().getEmail());
+                    log.info("Overdue reminder sent to: {}", req.getUser().getEmail());
                 } catch (Exception e) {
-                    // Ако нещо се прецака с имейла, да не спира целия цикъл
-                    System.err.println("❌ Грешка при пращане до " + req.getUser().getEmail() + ": " + e.getMessage());
+                    log.warn("Failed to send overdue reminder to {}: {}", req.getUser().getEmail(), e.getMessage());
                 }
             }
         }

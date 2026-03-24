@@ -1,5 +1,7 @@
 package com.uktc.schoolInventory.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.uktc.schoolInventory.exception.ResourceNotFoundException;
@@ -11,6 +13,7 @@ import com.uktc.schoolInventory.repositories.UserRepository;
 
 @Service
 public class RequestService {
+    private static final Logger log = LoggerFactory.getLogger(RequestService.class);
     private final RequestRepository repository;
     private final EmailService emailService;
     private final UserRepository userRepository; // Нова зависимост
@@ -35,7 +38,7 @@ public class RequestService {
         // 2. Fetch the equipment from the database
         var equipment = equipmentRepository.findById(request.getEquipment().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Equipment not found with id: " + request.getEquipment().getId()));
-        System.out.println("DEBUG: Опитвам се да запиша заявка за техника: " + equipment.getName());
+        log.debug("Saving request for equipment: {}", equipment.getName());
 
         // 3. Свързваме ги с текущата заявка
         request.setUser(user);
@@ -51,9 +54,9 @@ public class RequestService {
                     user.getEmail(),
                     equipment.getName()
             );
-            System.out.println("✅ Имейлът е изпратен към Mailtrap успешно!");
+            log.info("Email sent successfully");
         } catch (Exception e) {
-            System.err.println("❌ Грешка при пращане на имейл: " + e.getMessage());
+            log.warn("Failed to send email: {}", e.getMessage());
         }
 
         return saved;
