@@ -27,7 +27,7 @@ public class EquipmentController {
         this.service = service;
     }
 
-    @PostMapping("/all")
+    @GetMapping("/all")
     public List<Equipment> getAll() {
         return service.getAllEquipment();
     }
