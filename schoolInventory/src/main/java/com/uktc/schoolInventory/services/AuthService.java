@@ -17,17 +17,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthService {
     private final UserRepository userRepository;
-    private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
     public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
-                       UserService userService,
                        AuthenticationManager authenticationManager
     ){
         this.userRepository = userRepository;
-        this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
     }
@@ -53,7 +50,7 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(input.getEmail(), input.getPassword())
         );
 
-        User user = userRepository.findUserByEmail(input.getEmail())
+        User user = userRepository.findByEmail(input.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("No account found with that email address"));
 
         return new UserDto(user);

@@ -39,7 +39,6 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody UserLoginDto userLoginDto, HttpSession session, HttpServletRequest request){
-        User authendicatedUser = authService.authenticate(userLoginDto);
 
         UserDto authendicatedUser = authService.authenticate(userLoginDto);
 
@@ -50,17 +49,15 @@ public class AuthController {
         UsernamePasswordAuthenticationToken authToken =
             new UsernamePasswordAuthenticationToken(
                 authendicatedUser.getEmail(),
-                authendicatedUser.getPasswordHash(), // Use password hash for principal
-                List.of(new SimpleGrantedAuthority(authendicatedUser.getIsAdmin() ? "ROLE_ADMIN" : "ROLE_USER"))
+                List.of(new SimpleGrantedAuthority(authendicatedUser.getRole().name()))
             );
         authToken.setDetails(authendicatedUser); // Attach the full user object as details
         SecurityContextHolder.getContext().setAuthentication(authToken);
         session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
 
         LoginResponse loginResponse = new LoginResponse(
-                authendicatedUser.getId(),
                 authendicatedUser.getEmail(),
-                authendicatedUser.getIsAdmin()
+                authendicatedUser.getRole()
         );
         return ResponseEntity.ok(loginResponse);
     }
