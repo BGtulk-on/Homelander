@@ -1,16 +1,7 @@
 .rooms-tab-container {
   width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
-}
-
-.rooms-title {
-  color: var(--burnt-copper);
-  font-size: 1.8rem;
-  font-weight: 500;
-  margin-bottom: 2rem;
-  margin-top: 0;
 }
 
 .rooms-list {
@@ -27,7 +18,6 @@
   overflow: hidden;
   background: transparent;
   transition: background-color 0.3s ease, border-color 0.3s ease;
-  opacity: 0; /* Hidden for entrance animation */
 }
 
 .room-card-header {
@@ -41,6 +31,15 @@
 
 .room-card-header:hover {
   background-color: rgba(160, 67, 10, 0.03);
+}
+
+.room-card-header.disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.room-card-header.disabled:hover {
+  background-color: transparent;
 }
 
 .room-label {
@@ -58,6 +57,19 @@
 .room-number {
   font-size: 3.2rem;
   font-weight: 800;
+}
+
+.room-approved-badge {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--burnt-copper);
+  background: rgba(160, 67, 10, 0.1);
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: 0.5rem;
+  align-self: center;
 }
 
 .room-stats {
@@ -134,7 +146,7 @@
   justify-content: space-between;
   align-items: stretch;
   padding: 0;
-  height: 140px;
+  min-height: 140px;
 }
 
 .details-content {
@@ -187,6 +199,160 @@
   font-size: 1rem;
   opacity: 0.8;
   margin-right: 0.5rem;
+}
+
+.request-take-btn {
+  grid-column: span 2;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: var(--burnt-copper);
+  color: var(--bg-color, #DFE8E6);
+  border: 2px solid var(--burnt-copper);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.request-take-btn:hover:not(:disabled) {
+  background-color: transparent;
+  color: var(--burnt-copper);
+}
+
+.request-take-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.request-take-btn.sent {
+  background-color: transparent;
+  border-color: var(--burnt-copper);
+  color: var(--burnt-copper);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.request-take-btn.approved {
+  background-color: transparent;
+  border-color: var(--burnt-copper);
+  color: var(--burnt-copper);
+}
+
+.request-take-btn.approved:hover:not(:disabled) {
+  background-color: var(--burnt-copper);
+  color: var(--bg-color, #DFE8E6);
+}
+
+.request-action-container {
+  grid-column: span 2;
+  margin-top: 1rem;
+  width: 100%;
+  border: 2px solid var(--burnt-copper);
+  border-radius: 4px;
+  background: transparent;
+  transition: background-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.request-action-container.expanded {
+  background: rgba(160, 67, 10, 0.05);
+}
+
+.request-action-container .request-take-btn {
+  margin-top: 0;
+  border: none;
+}
+
+.request-expanded-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.date-prompt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.date-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--burnt-copper);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.date-cancel-x {
+  background: transparent;
+  border: none;
+  color: var(--burnt-copper);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.date-cancel-x:hover {
+  opacity: 1;
+}
+
+.return-date-input {
+  width: 100%;
+  padding: 0.8rem;
+  background: transparent;
+  border: 2px solid var(--burnt-copper);
+  color: var(--burnt-copper);
+  font-family: inherit;
+  font-size: 1.1rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.return-date-input:focus {
+  background: rgba(160, 67, 10, 0.08);
+}
+
+.status-notice-box {
+  grid-column: span 2;
+  margin-top: 1rem;
+  padding: 0.8rem 1rem;
+  background-color: rgba(160, 67, 10, 0.05);
+  border: 1.5px dashed var(--burnt-copper);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: var(--burnt-copper);
+}
+
+.notice-icon {
+  display: flex;
+  align-items: center;
+  opacity: 0.8;
+}
+
+.notice-text {
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.notice-text strong {
+  text-transform: uppercase;
+  font-weight: 700;
+  text-decoration: underline;
 }
 
 .room-card.expanded {

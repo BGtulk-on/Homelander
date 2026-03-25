@@ -6,6 +6,7 @@ import com.uktc.schoolInventory.dto.UserLoginDto;
 import com.uktc.schoolInventory.dto.UserRegisterDto;
 import com.uktc.schoolInventory.exception.DuplicateResourceException;
 import com.uktc.schoolInventory.exception.ResourceNotFoundException;
+import com.uktc.schoolInventory.exception.UnauthorizedActionException;
 import com.uktc.schoolInventory.models.User;
 import com.uktc.schoolInventory.repositories.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -54,9 +55,5 @@ public class AuthService {
                 .orElseThrow(() -> new ResourceNotFoundException("No account found with that email address"));
 
         return new UserDto(user);
-
-        }
-
+    }
 }
-
-

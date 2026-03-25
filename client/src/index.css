@@ -69,3 +69,26 @@ button:disabled {
   background: #ccc;
   cursor: not-allowed;
 }
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--burnt-copper);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #bf5412;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--burnt-copper) transparent;
+}
+

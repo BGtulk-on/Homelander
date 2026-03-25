@@ -1,0 +1,290 @@
+.requests-tab-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0 1.5rem;
+  box-sizing: border-box;
+}
+
+.requests-tab-title-wrapper {
+  margin-bottom: 0.8rem;
+  width: 100%;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.requests-tab-title {
+  padding: 0.6rem 1.2rem;
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: #A0430A;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0;
+  border: 2.5px solid transparent;
+}
+
+.requests-tab-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0 0 2rem 0;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  flex: 1;
+  min-height: 0;
+}
+
+.requests-tab-list::-webkit-scrollbar {
+  display: none;
+}
+
+.requests-tab-item-box {
+  width: 100%;
+  box-sizing: border-box;
+  border: 2.5px solid #A0430A;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.02);
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+  flex-shrink: 0;
+}
+
+.requests-tab-item-box:first-child { border-top-left-radius: 20px; border-top-right-radius: 20px; }
+.requests-tab-item-box:last-child { border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
+.requests-tab-item-box:first-child:last-child { border-radius: 20px; }
+
+.requests-tab-item-box.expanded {
+  background: rgba(160, 67, 10, 0.03);
+  border-color: #A0430A;
+  box-shadow: 0 4px 12px rgba(160, 67, 10, 0.1);
+}
+
+.requests-tab-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 1.2rem;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  color: #A0430A;
+  font-family: inherit;
+  transition: background-color 0.2s;
+  border-radius: 10px;
+}
+
+.requests-tab-header-main {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.requests-tab-username {
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.requests-tab-status-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  margin-left: 0.8rem;
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(160, 67, 10, 0.2);
+}
+
+.requests-tab-status-tag.status-pending { background: rgba(255, 213, 79, 0.2); color: #856404; border-color: rgba(255, 213, 79, 0.4); }
+.requests-tab-status-tag.status-approved { background: rgba(129, 199, 132, 0.2); color: #1b5e20; border-color: rgba(129, 199, 132, 0.4); }
+.requests-tab-status-tag.status-rejected { background: rgba(229, 115, 115, 0.2); color: #b71c1c; border-color: rgba(229, 115, 115, 0.4); }
+.requests-tab-status-tag.status-returned { background: rgba(100, 181, 246, 0.2); color: #0d47a1; border-color: rgba(100, 181, 246, 0.4); }
+
+.requests-tab-icon {
+  width: 18px;
+  height: 18px;
+  opacity: 0.8;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.requests-tab-icon.expanded {
+  transform: rotate(180deg);
+}
+
+.requests-tab-item-body {
+  padding: 0 1.2rem;
+  border-top: 1px solid transparent;
+}
+
+.requests-tab-body-info {
+  margin-top: 0.5rem;
+}
+
+.requests-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.8rem 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.requests-info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(160, 67, 10, 0.04);
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid rgba(160, 67, 10, 0.1);
+  min-height: 2.2rem;
+  box-sizing: border-box;
+}
+
+.requests-info-item.full-width {
+  grid-column: span 2;
+}
+
+.info-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #A0430A;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.info-value {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #A0430A;
+  word-break: break-all;
+  line-height: 1.2;
+}
+
+.requests-tab-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-bottom: 1rem;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.request-actions-row {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.requests-tab-action-btn {
+  flex: 1;
+  background: transparent;
+  border: 2px solid #A0430A;
+  color: #A0430A;
+  padding: 0.4rem;
+  cursor: pointer;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.requests-tab-action-btn:hover {
+  background: #A0430A;
+  color: #DFE8E6;
+}
+
+.requests-tab-action-btn.reject {
+  color: #b71c1c;
+  border-color: #b71c1c;
+}
+
+.requests-tab-action-btn.reject:hover {
+  background: #b71c1c;
+  color: white;
+}
+
+.approved-section-wrapper {
+  margin-top: 2rem;
+  width: 100%;
+}
+
+.returned-section-wrapper, .rejected-section-wrapper {
+  margin-top: 0.8rem;
+  width: 100%;
+}
+
+.rejected-toggle-btn, .returned-toggle-btn {
+  width: 100%;
+  background: transparent;
+  border: 2.5px solid #A0430A;
+  border-radius: 16px;
+  padding: 0.6rem 1.2rem;
+  color: #A0430A;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.rejected-toggle-btn:hover, .returned-toggle-btn:hover {
+  background-color: rgba(160, 67, 10, 0.05);
+}
+
+.rejected-toggle-btn.active, .returned-toggle-btn.active {
+  background-color: rgba(160, 67, 10, 0.08);
+}
+
+
+.section-divider {
+  height: 1px;
+  width: 100%;
+  border-top: 2px dashed rgba(160, 67, 10, 0.2);
+  margin: 0.5rem 0 1.5rem 0;
+  position: relative;
+}
+
+.section-divider::after {
+  content: 'APPROVED';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #DFE8E6;
+  padding: 0 0.8rem;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  opacity: 0.6;
+}
+
+.approved-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.request-status-info {
+  text-align: center;
+  font-size: 0.9rem;
+  padding: 0.5rem;
+  opacity: 0.8;
+}
+
+.requests-tab-loading, .requests-tab-error, .requests-tab-empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #A0430A;
+  font-weight: 500;
+}

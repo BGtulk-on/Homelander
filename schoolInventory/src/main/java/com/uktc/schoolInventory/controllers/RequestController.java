@@ -4,6 +4,7 @@ import java.net.URI;
 import java.time.OffsetDateTime;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import com.uktc.schoolInventory.exception.ResourceNotFoundException;
 import com.uktc.schoolInventory.models.EquipmentCondition;
 import com.uktc.schoolInventory.models.Request;
@@ -28,6 +30,16 @@ public class RequestController {
     public RequestController(RequestService requestService, RequestRepository repository) {
         this.requestService = requestService;
         this.repository = repository;
+    }
+
+    @GetMapping("/user/{userId}")
+    public List<Request> getRequestsByUser(@PathVariable Long userId) {
+        return repository.findAllByUser_Id(userId);
+    }
+
+    @GetMapping("/all")
+    public List<Request> getAllRequests() {
+        return repository.findAll();
     }
 
     @PostMapping

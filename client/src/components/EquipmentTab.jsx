@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useLayoutEffect, useMemo } from 'react'
 import gsap from 'gsap'
 import ZoomableImage from './ZoomableImage'
+import LazyItem from './LazyItem'
 import './EquipmentTab.css'
 
 function ActionConfirmBtn({ actionText, confirmText, onClick, disabled }) {
@@ -48,7 +49,7 @@ function ActionConfirmBtn({ actionText, confirmText, onClick, disabled }) {
   )
 }
 
-function EquipmentItem({ item, isExpanded, onToggle, onDelete, onUpdate, onAssign, users }) {
+function EquipmentItem({ item, index, isExpanded, onToggle, onDelete, onUpdate, onAssign, users, locations }) {
   const bodyRef = useRef(null)
   const containerRef = useRef(null)
   const actionsRef = useRef(null)
@@ -71,8 +72,8 @@ function EquipmentItem({ item, isExpanded, onToggle, onDelete, onUpdate, onAssig
   }
 
   const getLocationName = (id) => {
-    const locations = { 1: 'Room 1', 2: 'Room 2', 3: 'Room 3', 4: 'Room 4' }
-    return locations[id] || 'Storage'
+    const loc = locations.find(l => l.id === id)
+    return loc ? loc.roomName : 'Storage'
   }
 
   const filteredUsers = useMemo(() => {
@@ -133,6 +134,22 @@ function EquipmentItem({ item, isExpanded, onToggle, onDelete, onUpdate, onAssig
       })
     }
   }, [isExpanded])
+
+  useLayoutEffect(() => {
+    if (containerRef.current && !containerRef.current.dataset.entered) {
+      containerRef.current.dataset.entered = 'true'
+      gsap.fromTo(containerRef.current, 
+        { opacity: 0, y: 15 },
+        { 
+          opacity: 1, 
+          y: 0, 
+          duration: 0.45, 
+          delay: Math.min(index * 0.05, 0.8),
+          ease: 'power2.out' 
+        }
+      )
+    }
+  }, [index])
 
   useLayoutEffect(() => {
     if (!photoUrlRef.current || !bodyRef.current || !isExpanded) return
@@ -311,7 +328,9 @@ function EquipmentItem({ item, isExpanded, onToggle, onDelete, onUpdate, onAssig
               </span>
               {isEditing ? (
                 <select className="edit-input" value={editedItem.locationId} onChange={e => setEditedItem({ ...editedItem, locationId: parseInt(e.target.value) })}>
-                  <option value={1}>Room 1</option><option value={2}>Room 2</option><option value={3}>Room 3</option><option value={4}>Room 4</option>
+                  {locations.map(loc => (
+                    <option key={loc.id} value={loc.id}>{loc.roomName}</option>
+                  ))}
                 </select>
               ) : (
                 <span className="info-value">{getLocationName(item.locationId)}</span>
@@ -395,6 +414,7 @@ function EquipmentItem({ item, isExpanded, onToggle, onDelete, onUpdate, onAssig
 export default function EquipmentTab({ onEquipmentChange }) {
   const [equipment, setEquipment] = useState([])
   const [users, setUsers] = useState([])
+  const [locations, setLocations] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -412,20 +432,24 @@ export default function EquipmentTab({ onEquipmentChange }) {
   const fetchData = async (query = '') => {
     try {
       setIsLoading(true)
-      const [equipRes, userRes] = await Promise.all([
-        fetch(query ? '/api/equipment/search' : '/api/equipment/all', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: query || null })
-        }),
-        fetch('/api/users')
+      const [equipRes, userRes, locRes] = await Promise.all([
+        query 
+          ? fetch('/api/equipment/search', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ query })
+            })
+          : fetch('/api/equipment/all'),
+        fetch('/api/users'),
+        fetch('/api/locations')
       ])
       
-      if (!equipRes.ok || !userRes.ok) throw new Error('Failed to fetch data')
+      if (!equipRes.ok || !userRes.ok || !locRes.ok) throw new Error('Failed to fetch data')
       
-      const [equipData, userData] = await Promise.all([equipRes.json(), userRes.json()])
+      const [equipData, userData, locData] = await Promise.all([equipRes.json(), userRes.json(), locRes.json()])
       setEquipment(equipData)
       setUsers(userData)
+      setLocations(locData)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -451,15 +475,7 @@ export default function EquipmentTab({ onEquipmentChange }) {
   }, [showAddForm])
 
   useLayoutEffect(() => {
-    if (!isLoading && listRef.current) {
-      const items = listRef.current.querySelectorAll('.equip-tab-item-box')
-      if (initialLoadRef.current) {
-        initialLoadRef.current = false
-        gsap.fromTo(items, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.04, ease: 'power2.out' })
-      } else {
-        gsap.to(items, { opacity: 1, y: 0, duration: 0.35, stagger: 0.04, ease: 'power2.out', overwrite: true })
-      }
-    }
+    // Entrance handled by items
   }, [isLoading, equipment])
 
   const handleAdd = async (e) => {
@@ -539,7 +555,9 @@ export default function EquipmentTab({ onEquipmentChange }) {
                 <option value={1}>Laptop</option><option value={2}>Projector</option><option value={3}>Camera</option><option value={4}>Tablet</option>
               </select>
               <select value={newEquip.locationId} onChange={e => setNewEquip({...newEquip, locationId: parseInt(e.target.value)})}>
-                <option value={1}>Room 1</option><option value={2}>Room 2</option><option value={3}>Room 3</option><option value={4}>Room 4</option>
+                {locations.map(loc => (
+                  <option key={loc.id} value={loc.id}>{loc.roomName}</option>
+                ))}
               </select>
             </div>
             <div className="equip-tab-form-row">
@@ -562,12 +580,16 @@ export default function EquipmentTab({ onEquipmentChange }) {
       
       {!isLoading && !error && (
         <div className="equip-tab-list" ref={listRef}>
-          {equipment.length > 0 ? equipment.map(item => (
-            <EquipmentItem 
-              key={item.id} item={item} isExpanded={expandedId === item.id} 
-              onToggle={id => setExpandedId(expandedId === id ? null : id)}
-              onDelete={handleDelete} onUpdate={handleUpdate} onAssign={handleAssign} users={users}
-            />
+          {equipment.length > 0 ? equipment.map((item, index) => (
+            <LazyItem key={item.id} estimatedHeight="60px">
+              <EquipmentItem 
+                item={item} 
+                index={index}
+                isExpanded={expandedId === item.id} 
+                onToggle={id => setExpandedId(expandedId === id ? null : id)}
+                onDelete={handleDelete} onUpdate={handleUpdate} onAssign={handleAssign} users={users} locations={locations}
+              />
+            </LazyItem>
           )) : (
             <div style={{ textAlign: 'center', padding: '2rem', color: '#A0430A', opacity: 0.6 }}>No equipment found</div>
           )}
