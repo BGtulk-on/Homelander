@@ -13,4 +13,7 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
     List<Request> findByUserIdAndRequestStatus(Long userId, RequestStatusType status);
 
     List<Request> findByEquipmentIdAndRequestStatus(Long equipmentId, RequestStatusType status);
+
+    // Намираме всички заявки на даден потребител
+    List<Request> findAllByUser_Id(Long userId);
 }

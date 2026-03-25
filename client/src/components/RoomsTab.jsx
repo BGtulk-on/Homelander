@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import gsap from 'gsap'
 import ZoomableImage from './ZoomableImage'
+import LazyItem from './LazyItem'
+import LazyTbody from './LazyTbody'
 import './RoomsTab.css'
 
 const TYPE_NAMES = {
@@ -17,13 +19,25 @@ const LOCATION_NAMES = {
   4: '4'
 }
 
-function EquipmentItem({ item, isExpanded, onToggle }) {
+function EquipmentItem({ item, index, isExpanded, onToggle, user, activeRequest, onRefresh }) {
   const detailsRef = useRef(null)
+  const actionAreaRef = useRef(null)
+  const initialBtnRef = useRef(null)
+  const expandedFormRef = useRef(null)
+
   const [imgError, setImgError] = useState(false)
+  const [isRequesting, setIsRequesting] = useState(false)
+  const [requestSent, setRequestSent] = useState(false)
+  const [showDatePicker, setShowDatePicker] = useState(false)
+  const [returnDate, setReturnDate] = useState('')
+  const [isReturning, setIsReturning] = useState(false)
 
   useEffect(() => {
     setImgError(false)
-  }, [item.photoUrl])
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    setReturnDate(tomorrow.toISOString().split('T')[0])
+  }, [item.id])
 
   useEffect(() => {
     if (detailsRef.current) {
@@ -31,16 +45,154 @@ function EquipmentItem({ item, isExpanded, onToggle }) {
         gsap.to(detailsRef.current, { height: 'auto', opacity: 1, duration: 0.3, ease: 'power2.out' })
       } else {
         gsap.to(detailsRef.current, { height: 0, opacity: 0, duration: 0.3, ease: 'power2.in' })
+        setShowDatePicker(false)
       }
     }
   }, [isExpanded])
 
+  useLayoutEffect(() => {
+    if (!actionAreaRef.current || !initialBtnRef.current || !expandedFormRef.current) return
+
+    if (showDatePicker) {
+      const tl = gsap.timeline()
+      tl.to(initialBtnRef.current, { opacity: 0, duration: 0.2, ease: 'power2.inOut' })
+      tl.to(actionAreaRef.current, {
+        height: expandedFormRef.current.offsetHeight,
+        duration: 0.4,
+        ease: 'power3.inOut'
+      }, '-=0.1')
+      tl.to(expandedFormRef.current, { opacity: 1, duration: 0.2 }, '-=0.2')
+    } else {
+      const tl = gsap.timeline()
+      tl.to(expandedFormRef.current, { opacity: 0, duration: 0.2, ease: 'power2.inOut' })
+      tl.to(actionAreaRef.current, { height: '3.4rem', duration: 0.3, ease: 'power3.inOut' }, '-=0.1')
+      tl.to(initialBtnRef.current, { opacity: 1, duration: 0.2 }, '-=0.1')
+    }
+  }, [showDatePicker])
+
+  const handleRequestInit = (e) => {
+    e.stopPropagation()
+    if (!user) {
+      alert("You must be logged in to request equipment.")
+      return
+    }
+
+    if (activeRequest?.requestStatus === 'APPROVED') {
+      handleReturn(e)
+      return
+    }
+
+    if (isButtonDisabled) return
+    setShowDatePicker(true)
+  }
+
+  const handleReturn = async (e) => {
+    e.stopPropagation()
+    if (!activeRequest) return
+
+    if (!window.confirm("Are you sure you want to return this item?")) return
+
+    setIsReturning(true)
+    try {
+      const res = await fetch(`/api/requests/${activeRequest.id}/return?condition=EXCELLENT`, {
+        method: 'PUT'
+      })
+
+      if (!res.ok) throw new Error('Failed to return item')
+
+      if (onRefresh) onRefresh()
+    } catch (err) {
+      alert(err.message)
+    } finally {
+      setIsReturning(false)
+    }
+  }
+
+  const handleRequestCancel = (e) => {
+    e.stopPropagation()
+    setShowDatePicker(false)
+  }
+
+  const handleRequestFinal = async (e) => {
+    e.stopPropagation()
+    if (!returnDate) {
+      alert("Please select a return date.")
+      return
+    }
+
+    const selectedDate = new Date(returnDate)
+    const now = new Date()
+    if (selectedDate <= now) {
+      alert("Return date must be in the future.")
+      return
+    }
+
+    setIsRequesting(true)
+    try {
+      const res = await fetch('/api/requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user: { id: user.id },
+          equipment: { id: item.id },
+          requestedStartDate: now.toISOString(),
+          requestedEndDate: selectedDate.toISOString()
+        })
+      })
+
+      if (!res.ok) throw new Error('Failed to send request')
+
+      setRequestSent(true)
+      setShowDatePicker(false)
+      if (onRefresh) onRefresh()
+    } catch (err) {
+      alert(err.message)
+    } finally {
+      setIsRequesting(false)
+    }
+  }
+
+  const hasPending = activeRequest?.requestStatus === 'PENDING'
+  const isApproved = activeRequest?.requestStatus === 'APPROVED'
+  const isTakenBySomeoneElse = item.assigned && !isApproved
+  const isButtonDisabled = isRequesting || requestSent || hasPending || isReturning || isTakenBySomeoneElse
+
+  let buttonText = 'Request to Take'
+  if (isRequesting) buttonText = 'Requesting...'
+  else if (requestSent || hasPending) buttonText = 'Pending Approval'
+  else if (isApproved) buttonText = isReturning ? 'Returning...' : 'Return Item'
+  else if (isTakenBySomeoneElse) buttonText = 'Currently Taken'
+
+  useLayoutEffect(() => {
+    if (!containerRef.current) return;
+
+    if (!containerRef.current.dataset.entered) {
+      containerRef.current.dataset.entered = 'true'
+      gsap.fromTo(containerRef.current,
+        { opacity: 0, x: -10 },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.35,
+          delay: Math.min(index * 0.03, 0.5),
+          ease: 'power2.out'
+        }
+      )
+    }
+  }, [index])
+
+  const containerRef = useRef(null)
+
   return (
     <>
-      <tr className={`equipment-row ${isExpanded ? 'active' : ''}`} onClick={onToggle}>
+      <tr
+        className={`equipment-row ${isExpanded ? 'active' : ''}`}
+        onClick={onToggle}
+        ref={containerRef}
+      >
         <td className="eq-type">{TYPE_NAMES[item.typeId] || 'misc'}</td>
         <td className="eq-model">{item.name}</td>
-        <td className="eq-status">{item.status}</td>
+        <td className="eq-status">{isTakenBySomeoneElse ? 'Taken' : item.status}</td>
       </tr>
       <tr>
         <td colSpan="3" style={{ padding: 0 }}>
@@ -51,12 +203,76 @@ function EquipmentItem({ item, isExpanded, onToggle }) {
                 <div className="detail-item"><strong>Condition:</strong> {(item.currentCondition || 'Unknown').replace('_', ' ')}</div>
                 <div className="detail-item"><strong>Assigned To:</strong> {item.assignedTo || 'Unassigned'}</div>
                 <div className="detail-item"><strong>Assigned:</strong> {item.assigned ? 'Yes' : 'No'}</div>
+
+                {(item.status === 'Available' && !isTakenBySomeoneElse) || isApproved ? (
+                  <div
+                    className={`request-action-container ${showDatePicker ? 'expanded' : ''}`}
+                    ref={actionAreaRef}
+                    style={{ height: '3.4rem', overflow: 'hidden', position: 'relative' }}
+                  >
+                    <button
+                      ref={initialBtnRef}
+                      className={`request-take-btn ${(requestSent || hasPending) ? 'sent' : ''} ${isApproved ? 'approved' : ''}`}
+                      onClick={handleRequestInit}
+                      disabled={isButtonDisabled}
+                      style={{
+                        position: 'absolute', top: 0, left: 0, width: '100%',
+                        zIndex: showDatePicker ? 1 : 2
+                      }}
+                    >
+                      {buttonText}
+                    </button>
+
+                    <div
+                      ref={expandedFormRef}
+                      className="request-expanded-form"
+                      style={{
+                        opacity: 0,
+                        position: 'absolute', top: 0, left: 0, width: '100%',
+                        zIndex: showDatePicker ? 2 : 1,
+                        pointerEvents: showDatePicker ? 'all' : 'none'
+                      }}
+                    >
+                      <div className="date-prompt-header">
+                        <label className="date-label">Return Date</label>
+                        <button className="date-cancel-x" onClick={handleRequestCancel}>✕</button>
+                      </div>
+                      <input
+                        type="date"
+                        className="return-date-input"
+                        value={returnDate}
+                        onChange={(e) => setReturnDate(e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                        min={new Date().toISOString().split('T')[0]}
+                      />
+                      <button
+                        className="request-take-btn"
+                        onClick={handleRequestFinal}
+                        disabled={isRequesting}
+                      >
+                        {isRequesting ? 'Sending...' : 'Confirm Request'}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="status-notice-box">
+                    <span className="notice-icon">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                    </span>
+                    <span className="notice-text">
+                      {isTakenBySomeoneElse
+                        ? <>Item is currently <strong>TAKEN</strong> by {item.assignedTo} and cannot be requested.</>
+                        : <>Item is currently <strong>{item.status.replace('_', ' ')}</strong> and cannot be requested.</>
+                      }
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="rooms-equip-photo">
                 {item.photoUrl && !imgError ? (
-                  <ZoomableImage 
-                    src={item.photoUrl} 
-                    alt={item.name} 
+                  <ZoomableImage
+                    src={item.photoUrl}
+                    alt={item.name}
                     onError={() => setImgError(true)}
                   />
                 ) : (
@@ -73,13 +289,18 @@ function EquipmentItem({ item, isExpanded, onToggle }) {
   )
 }
 
-function RoomCard({ room, isExpanded, onToggle, expandedEquipmentIds, onToggleEquipment }) {
+function RoomCard({ room, index, isExpanded, onToggle, expandedEquipmentIds, onToggleEquipment, user, userRequests, onRefresh }) {
   const contentRef = useRef(null)
   const containerRef = useRef(null)
 
+  const approvedInRoom = Array.isArray(userRequests) ? userRequests.filter(req =>
+    req.requestStatus === 'APPROVED' &&
+    room.items.some(item => item.id === req.equipment.id)
+  ).length : 0
+
   useLayoutEffect(() => {
     if (!contentRef.current) return
-    
+
     if (!containerRef.current.dataset.initialized) {
       containerRef.current.dataset.initialized = 'true'
       gsap.set(contentRef.current, {
@@ -109,104 +330,144 @@ function RoomCard({ room, isExpanded, onToggle, expandedEquipmentIds, onToggleEq
     }
   }, [isExpanded])
 
+  useLayoutEffect(() => {
+    if (containerRef.current && !containerRef.current.dataset.entered) {
+      containerRef.current.dataset.entered = 'true'
+      gsap.fromTo(containerRef.current,
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          delay: Math.min(index * 0.1, 0.8),
+          ease: 'power3.out'
+        }
+      )
+    }
+  }, [index])
+
   return (
-    <div 
+    <div
       className={`room-card ${isExpanded ? 'expanded' : ''}`}
       ref={containerRef}
     >
-      <div className="room-card-header" onClick={() => onToggle(room.id)}>
+      <div
+        className={`room-card-header ${room.items.length === 0 ? 'disabled' : ''}`}
+        onClick={() => room.items.length > 0 && onToggle(room.id)}
+      >
         <div className="room-label">
-          <span className="room-text">room</span>
           <span className="room-number">{room.name}</span>
+          {approvedInRoom > 0 && (
+            <span className="room-approved-badge">
+              ({approvedInRoom} taken)
+            </span>
+          )}
         </div>
         <div className="room-stats">
-          {room.items.length} equipments
+          {room.items.length > 0 ? `${room.items.length} equipment` : 'empty'}
         </div>
       </div>
 
-      <div 
+      <div
         className={`room-card-content ${room.items.length === 0 ? 'empty' : ''}`}
         ref={contentRef}
         style={{ overflow: 'hidden' }}
       >
-        {room.items.length > 0 ? (
+        {room.items.length > 0 && (
           <table className="equipment-table">
-            <tbody>
-              {room.items.map((item) => (
-                <EquipmentItem 
-                  key={item.id} 
-                  item={item} 
-                  isExpanded={expandedEquipmentIds.includes(item.id)}
-                  onToggle={() => onToggleEquipment(item.id)}
-                />
-              ))}
-            </tbody>
+            {room.items.map((item, index) => {
+              const activeRequest = Array.isArray(userRequests)
+                ? userRequests.find(req =>
+                  req.equipment.id === item.id &&
+                  (req.requestStatus === 'PENDING' || req.requestStatus === 'APPROVED')
+                )
+                : null
+
+              return (
+                <LazyTbody key={item.id} estimatedHeight="48px">
+                  <EquipmentItem
+                    key={item.id}
+                    item={item}
+                    index={index}
+                    isExpanded={expandedEquipmentIds.includes(item.id)}
+                    onToggle={() => onToggleEquipment(item.id)}
+                    user={user}
+                    activeRequest={activeRequest}
+                    onRefresh={onRefresh}
+                  />
+                </LazyTbody>
+              )
+            })}
           </table>
-        ) : (
-          <div className="placeholder-row">
-            <span className="eq-type">room</span>
-            <span className="eq-model">{room.name} ....</span>
-            <span className="eq-status">0 ....</span>
-          </div>
         )}
       </div>
     </div>
   )
 }
 
-export default function RoomsTab({ refreshTrigger }) {
+export default function RoomsTab({ user, refreshTrigger }) {
   const [rooms, setRooms] = useState([])
+  const [userRequests, setUserRequests] = useState([])
   const [expandedRoomId, setExpandedRoomId] = useState(null)
   const [expandedEquipmentIds, setExpandedEquipmentIds] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
-  
+
   const containerRef = useRef(null)
   const hasAnimatedInRef = useRef(false)
 
-  useEffect(() => {
-    const fetchEquipment = async () => {
-      try {
-        if (!hasAnimatedInRef.current) {
-          setIsLoading(true)
-        }
-        const res = await fetch('/api/equipment/all', { method: 'POST' })
-        if (!res.ok) throw new Error('Failed to fetch rooms data')
-        const data = await res.json()
-        
-        const groups = {
-          1: { id: 1, name: '1', items: [] },
-          2: { id: 2, name: '2', items: [] },
-          3: { id: 3, name: '3', items: [] },
-          4: { id: 4, name: '4', items: [] }
-        }
-        
-        data.forEach(item => {
-          const locId = item.locationId || 1
-          if (groups[locId]) {
-            groups[locId].items.push(item)
-          }
-        })
-        
-        setRooms(Object.values(groups))
-      } catch(err) {
-        setError(err.message)
-      } finally {
-        setIsLoading(false)
+  const fetchData = async () => {
+    try {
+      if (!hasAnimatedInRef.current) {
+        setIsLoading(true)
       }
+
+      const [equipRes, locRes, requestsRes] = await Promise.all([
+        fetch('/api/equipment/all'),
+        fetch('/api/locations'),
+        user ? fetch(`/api/requests/user/${user.id}`).catch(() => ({ ok: false })) : Promise.resolve(null)
+      ])
+
+      if (!equipRes.ok || !locRes.ok) throw new Error('Failed to fetch rooms data')
+
+      const [data, locations] = await Promise.all([equipRes.json(), locRes.json()])
+      let requests = []
+
+      if (requestsRes && requestsRes.ok) {
+        try {
+          const json = await requestsRes.json()
+          if (Array.isArray(json)) requests = json
+        } catch (e) {
+          console.error("Error parsing requests JSON", e)
+        }
+      }
+
+      const groups = {}
+      locations.forEach(loc => {
+        groups[loc.id] = { id: loc.id, name: loc.roomName, items: [] }
+      })
+
+      data.forEach(item => {
+        const locId = item.locationId
+        if (locId && groups[locId]) {
+          groups[locId].items.push(item)
+        }
+      })
+
+      setRooms(Object.values(groups))
+      setUserRequests(requests)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setIsLoading(false)
     }
-    
-    fetchEquipment()
-  }, [refreshTrigger])
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [refreshTrigger, user?.id])
 
   useLayoutEffect(() => {
-    if (!isLoading && rooms.length > 0 && containerRef.current && !hasAnimatedInRef.current) {
-      hasAnimatedInRef.current = true
-      gsap.fromTo(containerRef.current.querySelectorAll('.room-card'),
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: 'power3.out' }
-      )
-    }
   }, [isLoading, rooms.length])
 
   const toggleRoom = (id) => {
@@ -231,20 +492,25 @@ export default function RoomsTab({ refreshTrigger }) {
 
   return (
     <div className="rooms-tab-container" ref={containerRef}>
-      <h1 className="rooms-title">Rooms</h1>
-      
       <div className="rooms-list">
-        {rooms.map(room => (
-          <RoomCard 
-            key={room.id}
-            room={room}
-            isExpanded={expandedRoomId === room.id}
-            onToggle={toggleRoom}
-            expandedEquipmentIds={expandedEquipmentIds}
-            onToggleEquipment={toggleEquipment}
-          />
+        {rooms.map((room, index) => (
+          <LazyItem key={room.id} estimatedHeight="140px">
+            <RoomCard
+              key={room.id}
+              room={room}
+              index={index}
+              isExpanded={expandedRoomId === room.id}
+              onToggle={toggleRoom}
+              expandedEquipmentIds={expandedEquipmentIds}
+              onToggleEquipment={toggleEquipment}
+              user={user}
+              userRequests={userRequests}
+              onRefresh={fetchData}
+            />
+          </LazyItem>
         ))}
       </div>
     </div>
   )
 }
+

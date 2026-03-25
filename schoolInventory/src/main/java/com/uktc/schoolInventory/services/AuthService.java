@@ -5,6 +5,7 @@ import com.uktc.schoolInventory.dto.UserRegisterDto;
 import com.uktc.schoolInventory.exception.BadRequestException;
 import com.uktc.schoolInventory.exception.DuplicateResourceException;
 import com.uktc.schoolInventory.exception.ResourceNotFoundException;
+import com.uktc.schoolInventory.exception.UnauthorizedActionException;
 import com.uktc.schoolInventory.models.User;
 import com.uktc.schoolInventory.repositories.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -44,6 +45,10 @@ public class AuthService {
 
         if (!passwordEncoder.matches(input.getPassword(), user.getPasswordHash())) {
             throw new BadRequestException("Incorrect email or password");
+        }
+
+        if (user.getApproved() == null || !user.getApproved()) {
+            throw new UnauthorizedActionException("Your account is pending approval.");
         }
 
         return user;

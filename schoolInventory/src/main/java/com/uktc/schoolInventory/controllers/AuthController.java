@@ -1,6 +1,7 @@
 package com.uktc.schoolInventory.controllers;
 
 import com.uktc.schoolInventory.dto.UserLoginDto;
+import com.uktc.schoolInventory.dto.UserRegisterDto;
 import com.uktc.schoolInventory.dto.response.LoginResponse;
 import com.uktc.schoolInventory.models.User;
 import com.uktc.schoolInventory.services.AuthService;
@@ -26,6 +27,12 @@ public class AuthController {
         this.authService = authService;
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<User> register(@RequestBody UserRegisterDto userRegisterDto) {
+        User registeredUser = authService.register(userRegisterDto);
+        return ResponseEntity.ok(registeredUser);
+    }
+
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody UserLoginDto userLoginDto, HttpSession session, HttpServletRequest request){
         User authendicatedUser = authService.authenticate(userLoginDto);
@@ -48,7 +55,8 @@ public class AuthController {
         LoginResponse loginResponse = new LoginResponse(
                 authendicatedUser.getId(),
                 authendicatedUser.getEmail(),
-                authendicatedUser.getIsAdmin()
+                authendicatedUser.getIsAdmin(),
+                authendicatedUser.getFirstName()
         );
         return ResponseEntity.ok(loginResponse);
     }

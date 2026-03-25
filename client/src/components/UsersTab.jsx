@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useLayoutEffect } from 'react'
 import gsap from 'gsap'
+import LazyItem from './LazyItem'
 import './UsersTab.css'
 
 function ActionConfirmBtn({ actionText, confirmText, onClick, disabled }) {
@@ -17,7 +18,7 @@ function ActionConfirmBtn({ actionText, confirmText, onClick, disabled }) {
     if (!isConfirming) {
       setIsConfirming(true)
       gsap.to(textContainerRef.current, { y: '-50%', duration: 0.25, ease: 'power2.out' })
-      
+
       timeoutRef.current = setTimeout(() => {
         setIsConfirming(false)
         gsap.to(textContainerRef.current, { y: '0%', duration: 0.25, ease: 'power2.out' })
@@ -31,8 +32,8 @@ function ActionConfirmBtn({ actionText, confirmText, onClick, disabled }) {
   return (
     <button className="users-tab-action-btn" onClick={handleClick} disabled={disabled}>
       <div style={{ height: '1.2rem', overflow: 'hidden', position: 'relative' }}>
-        <div 
-          ref={textContainerRef} 
+        <div
+          ref={textContainerRef}
           style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: '2.4rem' }}
         >
           <span style={{ flex: '0 0 1.2rem', display: 'flex', alignItems: 'center' }}>
@@ -45,18 +46,19 @@ function ActionConfirmBtn({ actionText, confirmText, onClick, disabled }) {
       </div>
     </button>
   )
-  }
+}
 
-function UserItem({ user, isExpanded, onToggle, onMakeAdmin, onApprove, onDelete, showActions }) {
+function UserItem({ user, index, isExpanded, onToggle, onMakeAdmin, onApprove, onDelete, showActions, isSuperUser }) {
   const bodyRef = useRef(null)
   const containerRef = useRef(null)
   const badgeRef = useRef(null)
   const [isRemoving, setIsRemoving] = useState(false)
   const [isPromoting, setIsPromoting] = useState(false)
+  const [isApproving, setIsApproving] = useState(false)
 
   useLayoutEffect(() => {
     if (!bodyRef.current) return
-    
+
     if (!containerRef.current.dataset.initialized) {
       containerRef.current.dataset.initialized = 'true'
       gsap.set(bodyRef.current, {
@@ -92,9 +94,25 @@ function UserItem({ user, isExpanded, onToggle, onMakeAdmin, onApprove, onDelete
     }
   }, [isExpanded])
 
+  useLayoutEffect(() => {
+    if (containerRef.current && !containerRef.current.dataset.entered) {
+      containerRef.current.dataset.entered = 'true'
+      gsap.fromTo(containerRef.current,
+        { opacity: 0, y: 15 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.45,
+          delay: Math.min(index * 0.05, 0.8),
+          ease: 'power2.out'
+        }
+      )
+    }
+  }, [index])
+
   useEffect(() => {
     if (user.isAdmin && badgeRef.current) {
-      gsap.fromTo(badgeRef.current, 
+      gsap.fromTo(badgeRef.current,
         { opacity: 0, scale: 0.8, x: 10 },
         { opacity: 1, scale: 1, x: 0, duration: 0.4, ease: 'back.out(1.7)' }
       )
@@ -104,9 +122,9 @@ function UserItem({ user, isExpanded, onToggle, onMakeAdmin, onApprove, onDelete
   const handleLiveRemove = (callback) => {
     setIsRemoving(true)
     const tl = gsap.timeline({
-        onComplete: () => callback(user.id)
+      onComplete: () => callback(user.id)
     })
-    
+
     tl.to(bodyRef.current, { height: 0, opacity: 0, duration: 0.25 })
     tl.to(containerRef.current, {
       height: 0,
@@ -125,11 +143,11 @@ function UserItem({ user, isExpanded, onToggle, onMakeAdmin, onApprove, onDelete
     setIsPromoting(true)
     const btn = bodyRef.current.querySelector('.make-admin-btn-wrapper')
     if (btn) {
-      gsap.to(btn, { 
-        opacity: 0, 
+      gsap.to(btn, {
+        opacity: 0,
         y: -5,
-        duration: 0.25, 
-        ease: 'power2.inOut', 
+        duration: 0.25,
+        ease: 'power2.inOut',
         onComplete: () => {
           onMakeAdmin(user.id)
           setIsPromoting(false)
@@ -140,16 +158,34 @@ function UserItem({ user, isExpanded, onToggle, onMakeAdmin, onApprove, onDelete
     }
   }
 
-  const approveWithAnim = () => handleLiveRemove(onApprove)
+  const handleApproveWithAnim = () => {
+    setIsApproving(true)
+    const btnWrapper = bodyRef.current.querySelector('.approve-btn-wrapper')
+    if (btnWrapper) {
+      gsap.to(btnWrapper, {
+        opacity: 0,
+        y: -5,
+        duration: 0.25,
+        ease: 'power2.inOut',
+        onComplete: () => {
+          onApprove(user.id)
+          setIsApproving(false)
+        }
+      })
+    } else {
+      onApprove(user.id)
+    }
+  }
+
   const deleteWithAnim = () => handleLiveRemove(onDelete)
 
   return (
-    <div 
-      className={`users-tab-item-box ${isExpanded ? 'expanded' : ''}`} 
+    <div
+      className={`users-tab-item-box ${isExpanded ? 'expanded' : ''}`}
       ref={containerRef}
       style={{ overflow: 'hidden' }}
     >
-      <button 
+      <button
         className="users-tab-item-header"
         onClick={() => !isRemoving && onToggle(user.id)}
       >
@@ -160,18 +196,23 @@ function UserItem({ user, isExpanded, onToggle, onMakeAdmin, onApprove, onDelete
           <span className="users-tab-type-tag">
             {user.isAdmin ? 'Admin' : 'User'}
           </span>
+          {(!user.approved && user.approved !== undefined) && (
+            <span className="users-tab-type-tag users-tab-pending-badge" style={{ borderColor: 'var(--burnt-copper)', background: 'transparent' }}>
+              Pending
+            </span>
+          )}
         </div>
-        <svg 
-          className={`users-tab-icon ${isExpanded ? 'expanded' : ''}`} 
-          viewBox="0 0 24 24" 
-          fill="none" 
+        <svg
+          className={`users-tab-icon ${isExpanded ? 'expanded' : ''}`}
+          viewBox="0 0 24 24"
+          fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
-      
-      <div 
+
+      <div
         className="users-tab-item-body"
         ref={bodyRef}
         style={{ overflow: 'hidden' }}
@@ -180,7 +221,7 @@ function UserItem({ user, isExpanded, onToggle, onMakeAdmin, onApprove, onDelete
           <div className="users-info-grid">
             <div className="users-info-item full-width" title="Role">
               <span className="info-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
               </span>
               <span className="info-value">
                 {user.isAdmin ? 'Administrator' : 'User'}
@@ -189,43 +230,43 @@ function UserItem({ user, isExpanded, onToggle, onMakeAdmin, onApprove, onDelete
 
             <div className="users-info-item full-width" title="Email">
               <span className="info-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
               </span>
               <span className="info-value">{user.email}</span>
             </div>
-            
+
             <div className="users-info-item full-width" title="Phone">
               <span className="info-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
               </span>
               <span className="info-value">{user.phone || 'N/A'}</span>
             </div>
 
             <div className="users-info-item" title="Address">
               <span className="info-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
               </span>
               <span className="info-value">{user.address || 'N/A'}</span>
             </div>
 
             <div className="users-info-item" title="Joined Date">
               <span className="info-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
               </span>
               <span className="info-value">{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</span>
             </div>
           </div>
         </div>
-        
+
         <div className="users-tab-actions">
           {showActions && (
             <>
               {!user.isAdmin && (
-                <div 
-                  className="make-admin-btn-wrapper" 
+                <div
+                  className="make-admin-btn-wrapper"
                   style={{ width: '100%', display: isPromoting ? 'none' : 'block' }}
                 >
-                  <ActionConfirmBtn 
+                  <ActionConfirmBtn
                     key={`admin-${user.id}`}
                     actionText="Make Admin"
                     confirmText="Confirm?"
@@ -233,21 +274,28 @@ function UserItem({ user, isExpanded, onToggle, onMakeAdmin, onApprove, onDelete
                   />
                 </div>
               )}
-              
-              <button 
-                className="users-tab-action-btn" 
-                onClick={approveWithAnim}
-                disabled={isRemoving}
-              >
-                Approve
-              </button>
-              
-              <ActionConfirmBtn 
-                key={`delete-${user.id}`}
-                actionText="Delete"
-                confirmText="Confirm?"
-                onClick={deleteWithAnim}
-              />
+              {!user.approved && user.approved !== undefined && (
+                <div
+                  className="approve-btn-wrapper"
+                  style={{ width: '100%', display: isApproving ? 'none' : 'block' }}
+                >
+                  <ActionConfirmBtn
+                    key={`approve-${user.id}`}
+                    actionText="Approve"
+                    confirmText="Confirm?"
+                    onClick={handleApproveWithAnim}
+                  />
+                </div>
+              )}
+
+              {isSuperUser && (
+                <ActionConfirmBtn
+                  key={`delete-${user.id}`}
+                  actionText="Delete"
+                  confirmText="Confirm?"
+                  onClick={deleteWithAnim}
+                />
+              )}
             </>
           )}
         </div>
@@ -262,11 +310,12 @@ export default function UsersTab({ currentUser }) {
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [expandedId, setExpandedId] = useState(null)
-  
+
   const listRef = useRef(null)
   const hasAnimatedInRef = useRef(false)
 
   const isSuperUser = currentUser?.id === 1
+  const isAdminUser = currentUser?.isAdmin || isSuperUser
 
   const fetchUsers = async () => {
     try {
@@ -287,21 +336,13 @@ export default function UsersTab({ currentUser }) {
   }, [])
 
   useLayoutEffect(() => {
-    if (!isLoading && users.length > 0 && listRef.current && !hasAnimatedInRef.current) {
-      hasAnimatedInRef.current = true
-      const items = listRef.current.querySelectorAll('.users-tab-item-box')
-      gsap.fromTo(items, 
-        { opacity: 0, y: 15 },
-        { opacity: 1, y: 0, duration: 0.3, stagger: 0.04, ease: 'power2.out' }
-      )
-    }
   }, [isLoading, users])
 
   const handleApprove = async (id) => {
     try {
       const res = await fetch(`/api/users/${id}/approve?requesterId=${currentUser?.id}`, { method: 'PUT' })
       if (!res.ok) throw new Error('Failed to approve')
-      setUsers(prev => prev.filter(u => u.id !== id))
+      setUsers(prev => prev.map(u => u.id === id ? { ...u, approved: true } : u))
     } catch (err) {
       alert(err.message)
     }
@@ -311,7 +352,7 @@ export default function UsersTab({ currentUser }) {
     try {
       const res = await fetch(`/api/users/${id}/make-admin?requesterId=${currentUser?.id}`, { method: 'PUT' })
       if (!res.ok) throw new Error('Failed to make admin')
-      
+
       setUsers(prev => prev.map(u => u.id === id ? { ...u, isAdmin: true } : u))
     } catch (err) {
       alert(err.message)
@@ -332,7 +373,7 @@ export default function UsersTab({ currentUser }) {
     setExpandedId(prev => prev === id ? null : id)
   }
 
-  const filteredUsers = users.filter(user => 
+  const filteredUsers = users.filter(user =>
     user.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.email.toLowerCase().includes(searchQuery.toLowerCase())
@@ -341,34 +382,37 @@ export default function UsersTab({ currentUser }) {
   return (
     <div className="users-tab-container">
       <div className="users-tab-search-wrapper">
-        <input 
-          type="text" 
-          className="users-tab-search" 
-          placeholder="search users" 
+        <input
+          type="text"
+          className="users-tab-search"
+          placeholder="search users"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
-      
+
       {isLoading && <div className="users-tab-loading">Loading...</div>}
       {error && <div className="users-tab-error">Error: {error}</div>}
       {!isLoading && !error && filteredUsers.length === 0 && (
         <div className="users-tab-empty">No users found.</div>
       )}
-      
+
       {!isLoading && !error && filteredUsers.length > 0 && (
         <div className="users-tab-list" ref={listRef}>
-          {filteredUsers.map(user => (
-            <UserItem 
-              key={user.id} 
-              user={user} 
-              isExpanded={expandedId === user.id} 
-              onToggle={toggleExpand}
-              onMakeAdmin={handleMakeAdmin}
-              onApprove={handleApprove}
-              onDelete={handleDelete}
-              showActions={isSuperUser}
-            />
+          {filteredUsers.map((user, index) => (
+            <LazyItem key={user.id} estimatedHeight="54px">
+              <UserItem
+                user={user}
+                index={index}
+                isExpanded={expandedId === user.id}
+                onToggle={toggleExpand}
+                onMakeAdmin={handleMakeAdmin}
+                onApprove={handleApprove}
+                onDelete={handleDelete}
+                showActions={isSuperUser && currentUser?.id !== user.id}
+                isSuperUser={isSuperUser}
+              />
+            </LazyItem>
           ))}
         </div>
       )}

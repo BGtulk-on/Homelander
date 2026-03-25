@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useLayoutEffect } from 'react'
 import gsap from 'gsap'
 import UsersTab from './UsersTab'
 import EquipmentTab from './EquipmentTab'
+import RequestsTab from './RequestsTab'
 import RoomsTab from './RoomsTab'
 import './Home.css'
 
@@ -13,9 +14,30 @@ export default function Home({ user, onLogout }) {
   const [isRequestsAnimating, setIsRequestsAnimating] = useState(false)
   const [activeTab, setActiveTab] = useState('equipment')
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [showProfile, setShowProfile] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+  
+  const titleRef = useRef(null)
+  const profileRef = useRef(null)
+  const dropdownRef = useRef(null)
+  const letterRef = useRef(null)
+  const menuRef = useRef(null)
+  const timelineRef = useRef(null)
 
   const handleEquipmentChange = () => {
     setRefreshTrigger(prev => prev + 1)
+  }
+
+  const renderSidebarContent = () => {
+    switch (activeTab) {
+      case 'users':
+        return <UsersTab currentUser={user} />
+      case 'requests':
+        return <RequestsTab currentUser={user} />
+      case 'equipment':
+      default:
+        return <EquipmentTab onEquipmentChange={handleEquipmentChange} />
+    }
   }
 
   useLayoutEffect(() => {
@@ -45,6 +67,95 @@ export default function Home({ user, onLogout }) {
     }
   }, [])
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setShowProfile(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  useEffect(() => {
+    const area = contentRef.current
+    if (!area) return
+
+    const handleScroll = () => {
+      const scrollY = area.scrollTop
+      const progress = Math.min(scrollY / 150, 1) 
+      setIsScrolled(scrollY > 20)
+
+      if (titleRef.current) {
+        gsap.to(titleRef.current, {
+          fontSize: (8 - 6 * progress) + 'rem',
+          marginBottom: (3 - 3 * progress) + 'rem',
+          duration: 0.1,
+          overwrite: 'auto',
+          ease: 'power1.out'
+        })
+      }
+
+      if (profileRef.current) {
+        gsap.to(profileRef.current, {
+          scale: 1 - 0.15 * progress,
+          duration: 0.1,
+          overwrite: 'auto',
+          ease: 'power1.out'
+        })
+      }
+
+      const header = area.querySelector('.dashboard-sticky-header')
+      if (header) {
+        gsap.to(header, {
+          paddingTop: (4 - 3.2 * progress) + 'rem',
+          paddingBottom: (1 - 0.5 * progress) + 'rem',
+          duration: 0.1,
+          overwrite: 'auto',
+          ease: 'power1.out'
+        })
+      }
+    }
+
+    area.addEventListener('scroll', handleScroll)
+    return () => area.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  useLayoutEffect(() => {
+    if (!profileRef.current || !letterRef.current || !menuRef.current) return
+
+    if (!timelineRef.current) {
+      const tl = gsap.timeline({ paused: true, reversed: true })
+      
+      tl.to(letterRef.current, { 
+        opacity: 0, 
+        scale: 0.8, 
+        duration: 0.2, 
+        ease: 'power2.in' 
+      })
+      .to(profileRef.current, {
+        width: 220,
+        height: 140,
+        borderRadius: '12px',
+        duration: 0.45,
+        ease: 'power4.inOut'
+      }, '-=0.1')
+      .fromTo(menuRef.current, 
+        { autoAlpha: 0, y: 10 }, 
+        { autoAlpha: 1, y: 0, duration: 0.25, ease: 'power2.out' },
+        '-=0.15'
+      )
+      
+      timelineRef.current = tl
+    }
+
+    if (showProfile) {
+      timelineRef.current.play()
+    } else {
+      timelineRef.current.reverse()
+    }
+  }, [showProfile])
+
   const triggerUsersAnimation = () => {
     if (isUsersAnimating) return
     setIsUsersAnimating(true)
@@ -62,6 +173,7 @@ export default function Home({ user, onLogout }) {
   const triggerRequestsAnimation = () => {
     if (isRequestsAnimating) return
     setIsRequestsAnimating(true)
+    setActiveTab('requests')
     setTimeout(() => setIsRequestsAnimating(false), 800)
   }
 
@@ -70,7 +182,7 @@ export default function Home({ user, onLogout }) {
       {(user?.isAdmin || user?.id === 1) && (
         <aside className="home-sidebar">
           <div className="home-sidebar-content">
-            {activeTab === 'users' ? <UsersTab currentUser={user} /> : <EquipmentTab onEquipmentChange={handleEquipmentChange} />}
+            {renderSidebarContent()}
           </div>
           
           <nav className="home-nav-bottom" ref={navRef}>
@@ -147,7 +259,39 @@ export default function Home({ user, onLogout }) {
         </aside>
       )}
       <div className="home-dashboard-area" ref={contentRef}>
-        <RoomsTab refreshTrigger={refreshTrigger} />
+        <header className="dashboard-sticky-header">
+          <h1 className="rooms-title" ref={titleRef}>Rooms</h1>
+          
+          <div 
+            className="home-profile-card" 
+            ref={profileRef}
+            onClick={(e) => {
+              if (!showProfile) setShowProfile(true)
+            }}
+          >
+            <div className="profile-letter-box" ref={letterRef}>
+              {user?.firstName?.charAt(0).toUpperCase() || '?'}
+            </div>
+            
+            <div className="profile-menu-content" ref={menuRef} style={{ visibility: 'hidden' }}>
+              <div className="profile-dropdown-info">
+                <span className="profile-name">{user?.firstName} {user?.lastName}</span>
+                <span className="profile-role">{user?.isAdmin || user?.id === 1 ? 'Administrator' : 'User'}</span>
+              </div>
+              <div className="profile-dropdown-divider" />
+              <button className="profile-logout-btn" onClick={onLogout}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+                Logout
+              </button>
+            </div>
+          </div>
+        </header>
+        
+        <RoomsTab user={user} refreshTrigger={refreshTrigger} />
       </div>
     </div>
   )

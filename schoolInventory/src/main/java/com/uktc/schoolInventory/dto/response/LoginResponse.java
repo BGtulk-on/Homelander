@@ -9,4 +9,5 @@ public class LoginResponse {
     private Long id;
     private String email;
     private Boolean isAdmin;
+    private String firstName;
 }
