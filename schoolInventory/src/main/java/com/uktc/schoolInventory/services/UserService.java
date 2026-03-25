@@ -4,9 +4,9 @@ import com.uktc.schoolInventory.models.User;
 import com.uktc.schoolInventory.repositories.UserRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,4 +39,5 @@ public class UserService implements UserDetailsService {
                 List.of(new SimpleGrantedAuthority(role))
         );
     }
+
 }

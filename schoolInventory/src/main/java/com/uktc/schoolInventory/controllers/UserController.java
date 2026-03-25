@@ -33,7 +33,7 @@ public class UserController {
 
     // Approve registration
     @PutMapping("/{id}/approve")
-    @PreAuthorize("hasRole('SUPERUSER')")
+    @PreAuthorize("hasRole('SUPERUSER') or hasRole('ADMIN')")
     public String approveUser(@PathVariable Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));

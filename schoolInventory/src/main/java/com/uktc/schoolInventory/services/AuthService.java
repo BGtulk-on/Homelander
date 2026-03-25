@@ -1,9 +1,9 @@
 package com.uktc.schoolInventory.services;
 
 import com.uktc.schoolInventory.controllers.user.Role;
+import com.uktc.schoolInventory.dto.UserDto;
 import com.uktc.schoolInventory.dto.UserLoginDto;
 import com.uktc.schoolInventory.dto.UserRegisterDto;
-import com.uktc.schoolInventory.exception.BadRequestException;
 import com.uktc.schoolInventory.exception.DuplicateResourceException;
 import com.uktc.schoolInventory.exception.ResourceNotFoundException;
 import com.uktc.schoolInventory.models.User;
@@ -32,7 +32,7 @@ public class AuthService {
         this.authenticationManager = authenticationManager;
     }
 
-    public User register(UserRegisterDto input){
+    public UserDto register(UserRegisterDto input){
         if (userRepository.findByEmail(input.getEmail()).isPresent()) {
             throw new DuplicateResourceException("A user with this email already exists");
         }
@@ -43,17 +43,20 @@ public class AuthService {
         user.setPasswordHash(passwordEncoder.encode(input.getPassword()));
         user.setRole(Role.USER);
 
-        return userRepository.save(user);
+        User saveduser = userRepository.save(user);
+        return new UserDto(saveduser);
 
     }
 
-    public User authenticate(UserLoginDto input){
+    public UserDto authenticate(UserLoginDto input){
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(input.getEmail(), input.getPassword())
         );
 
-        return userRepository.findByEmail(input.getEmail())
+        User user = userRepository.findUserByEmail(input.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("No account found with that email address"));
+
+        return new UserDto(user);
 
         }
 

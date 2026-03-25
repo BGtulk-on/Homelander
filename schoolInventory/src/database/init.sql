@@ -25,7 +25,7 @@ CREATE TABLE users (
     last_name VARCHAR(50),
     email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    isAdmin BOOLEAN DEFAULT FALSE,
+    role VARCHAR(20) DEFAULT 'USER',
     created_at TIMESTAMPTZ DEFAULT NOW(),
     approved BOOLEAN DEFAULT FALSE
 );
@@ -89,13 +89,13 @@ CREATE INDEX idx_requests_status ON requests(request_status);
 CREATE INDEX idx_equipment_serial ON equipment(serial_number);
 
 -- ======================
--- Users (first user is admin)
+-- Users (first user is admin and the last user is a superuser)
 -- ======================
-INSERT INTO users (first_name, last_name, email, password_hash, isAdmin)
+INSERT INTO users (first_name, last_name, email, password_hash, role)
 VALUES 
-('Ivan', 'Petrov', 'ivan.petrov@example.com', 'HASHED_PASSWORD_1', TRUE),   -- admin
-('Maria', 'Georgieva', 'maria.georgieva@example.com', 'HASHED_PASSWORD_2', FALSE),
-('Georgi', 'Ivanov', 'georgi.ivanov@example.com', 'HASHED_PASSWORD_3', FALSE);
+('Ivan', 'Petrov', 'ivan.petrov@example.com', 'HASHED_PASSWORD_1', 'ADMIN'),   -- admin
+('Maria', 'Georgieva', 'maria.georgieva@example.com', 'HASHED_PASSWORD_2', 'USER'),
+('Georgi', 'Ivanov', 'georgi.ivanov@example.com', 'HASHED_PASSWORD_3', 'SUPERUSER');
 
 -- ======================
 -- Contacts

@@ -1,8 +1,12 @@
 package com.uktc.schoolInventory.dto;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
-@Data
+@Getter
+@AllArgsConstructor
+@EqualsAndHashCode
 public class UserLoginDto {
     private String email;
     private String password;

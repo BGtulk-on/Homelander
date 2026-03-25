@@ -17,9 +17,9 @@ public enum Role {
     USER(Collections.emptySet()),
     SUPERUSER(
            Set.of(
-                  Permission.SUPERUSER_CREATE,
-                   Permission.SUPERUSER_CREATE,
+                  Permission.SUPERUSER_READ,
                    Permission.SUPERUSER_UPDATE,
+                   Permission.SUPERUSER_DELETE,
                    Permission.SUPERUSER_CREATE,
                    Permission.ADMIN_READ,
                    Permission.ADMIN_UPDATE,
@@ -48,5 +48,4 @@ public enum Role {
                 .collect(Collectors.toList());
         authorities.add(new SimpleGrantedAuthority("ROLE_" + this.name()));
         return authorities;
-    }
-}
+    }}
