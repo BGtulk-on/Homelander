@@ -298,6 +298,41 @@ function RoomCard({ room, index, isExpanded, onToggle, expandedEquipmentIds, onT
     room.items.some(item => item.id === req.equipment.id)
   ).length : 0
 
+  const [isRenaming, setIsRenaming] = useState(false)
+  const [editName, setEditName] = useState(room.name)
+
+  const handleRoomRename = async () => {
+    if (!editName.trim() || editName === room.name) {
+      setIsRenaming(false)
+      return
+    }
+    try {
+      const res = await fetch(`/api/locations/${room.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roomName: editName })
+      })
+      if (!res.ok) throw new Error('Failed to rename')
+      const updated = await res.json()
+      
+      onRefresh(true, updated) // Provide hinted update
+      setIsRenaming(false)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleRoomDelete = async () => {
+    if (!window.confirm(`Delete ${room.name}?`)) return
+    try {
+      const res = await fetch(`/api/locations/${room.id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Failed to delete')
+      onRefresh(false, null, room.id) // Hint for deletion
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   useLayoutEffect(() => {
     if (!contentRef.current) return
 
@@ -356,7 +391,42 @@ function RoomCard({ room, index, isExpanded, onToggle, expandedEquipmentIds, onT
         onClick={() => room.items.length > 0 && onToggle(room.id)}
       >
         <div className="room-label">
-          <span className="room-number">{room.name}</span>
+          {isRenaming ? (
+            <input 
+              autoFocus
+              className="room-rename-input" 
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              onBlur={() => setIsRenaming(false)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleRoomRename()
+                if (e.key === 'Escape') setIsRenaming(false)
+              }}
+              onClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <span className="room-number" onDoubleClick={() => (user?.role === 'ADMIN' || user?.role === 'SUPERUSER') && setIsRenaming(true)}>
+              {room.name}
+            </span>
+          )}
+          
+          {(user?.role === 'ADMIN' || user?.role === 'SUPERUSER') && !isRenaming && (
+            <div className="room-admin-actions">
+              <button 
+                className="room-action-link" 
+                onClick={(e) => { e.stopPropagation(); setIsRenaming(true); }}
+              >
+                rename
+              </button>
+              <button 
+                className="room-action-link delete" 
+                onClick={(e) => { e.stopPropagation(); handleRoomDelete(); }}
+              >
+                delete
+              </button>
+            </div>
+          )}
+
           {approvedInRoom > 0 && (
             <span className="room-approved-badge">
               ({approvedInRoom} taken)
@@ -412,11 +482,22 @@ export default function RoomsTab({ user, refreshTrigger }) {
   const [expandedEquipmentIds, setExpandedEquipmentIds] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [newRoomName, setNewRoomName] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const containerRef = useRef(null)
   const hasAnimatedInRef = useRef(false)
 
-  const fetchData = async () => {
+  const fetchData = async (hint_isUpdate, hint_payload, hint_deleteId) => {
+    if (hint_isUpdate !== undefined) {
+      if (hint_deleteId) {
+        setRooms(prev => prev.filter(r => r.id !== hint_deleteId))
+      } else if (hint_isUpdate && hint_payload) {
+        setRooms(prev => prev.map(r => r.id === hint_payload.id ? { ...r, name: hint_payload.roomName } : r))
+      }
+      return
+    }
+
     try {
       if (!hasAnimatedInRef.current) {
         setIsLoading(true)
@@ -425,7 +506,7 @@ export default function RoomsTab({ user, refreshTrigger }) {
       const [equipRes, locRes, requestsRes] = await Promise.all([
         fetch('/api/equipment/all'),
         fetch('/api/locations'),
-        user ? fetch(`/api/requests/user/${user.id}`).catch(() => ({ ok: false })) : Promise.resolve(null)
+        (user && user.id) ? fetch(`/api/requests/user/${user.id}`).catch(() => ({ ok: false })) : Promise.resolve(null)
       ])
 
       if (!equipRes.ok || !locRes.ok) throw new Error('Failed to fetch rooms data')
@@ -460,6 +541,36 @@ export default function RoomsTab({ user, refreshTrigger }) {
       setError(err.message)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleAddRoom = async (e) => {
+    e.preventDefault()
+    if (!newRoomName.trim() || isSubmitting) return
+    
+    setIsSubmitting(true)
+    try {
+      const res = await fetch('/api/locations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roomName: newRoomName })
+      })
+      
+      if (!res.ok) throw new Error('Failed to create room')
+      const created = await res.json()
+      
+      const newRoom = { 
+        id: created.id, 
+        name: created.roomName, 
+        items: [] 
+      }
+      
+      setRooms(prev => [...prev, newRoom])
+      setNewRoomName('')
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -510,6 +621,22 @@ export default function RoomsTab({ user, refreshTrigger }) {
           </LazyItem>
         ))}
       </div>
+
+      {(user?.role === 'ADMIN' || user?.role === 'SUPERUSER') && (
+        <form className="add-room-form" onSubmit={handleAddRoom}>
+          <input 
+            type="text" 
+            placeholder="new room name..." 
+            value={newRoomName}
+            onChange={(e) => setNewRoomName(e.target.value)}
+            className="add-room-input"
+            required
+          />
+          <button type="submit" disabled={isSubmitting} className="add-room-btn">
+            {isSubmitting ? '...' : 'ADD ROOM'}
+          </button>
+        </form>
+      )}
     </div>
   )
 }

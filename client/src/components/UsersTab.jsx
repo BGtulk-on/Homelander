@@ -111,13 +111,13 @@ function UserItem({ user, index, isExpanded, onToggle, onMakeAdmin, onApprove, o
   }, [index])
 
   useEffect(() => {
-    if (user.isAdmin && badgeRef.current) {
+    if ((user.role === 'ADMIN' || user.role === 'SUPERUSER') && badgeRef.current) {
       gsap.fromTo(badgeRef.current,
         { opacity: 0, scale: 0.8, x: 10 },
         { opacity: 1, scale: 1, x: 0, duration: 0.4, ease: 'back.out(1.7)' }
       )
     }
-  }, [user.isAdmin])
+  }, [user.role])
 
   const handleLiveRemove = (callback) => {
     setIsRemoving(true)
@@ -194,7 +194,7 @@ function UserItem({ user, index, isExpanded, onToggle, onMakeAdmin, onApprove, o
             {user.firstName} {user.lastName}
           </span>
           <span className="users-tab-type-tag">
-            {user.isAdmin ? 'Admin' : 'User'}
+            {user.role === 'SUPERUSER' ? 'Super' : (user.role === 'ADMIN' ? 'Admin' : 'User')}
           </span>
           {(!user.approved && user.approved !== undefined) && (
             <span className="users-tab-type-tag users-tab-pending-badge" style={{ borderColor: 'var(--burnt-copper)', background: 'transparent' }}>
@@ -224,7 +224,7 @@ function UserItem({ user, index, isExpanded, onToggle, onMakeAdmin, onApprove, o
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
               </span>
               <span className="info-value">
-                {user.isAdmin ? 'Administrator' : 'User'}
+                {user.role === 'SUPERUSER' ? 'SuperUser' : (user.role === 'ADMIN' ? 'Administrator' : 'User')}
               </span>
             </div>
 
@@ -261,7 +261,7 @@ function UserItem({ user, index, isExpanded, onToggle, onMakeAdmin, onApprove, o
         <div className="users-tab-actions">
           {showActions && (
             <>
-              {!user.isAdmin && (
+              {user.role !== 'ADMIN' && user.role !== 'SUPERUSER' && (
                 <div
                   className="make-admin-btn-wrapper"
                   style={{ width: '100%', display: isPromoting ? 'none' : 'block' }}
@@ -314,8 +314,8 @@ export default function UsersTab({ currentUser }) {
   const listRef = useRef(null)
   const hasAnimatedInRef = useRef(false)
 
-  const isSuperUser = currentUser?.id === 1
-  const isAdminUser = currentUser?.isAdmin || isSuperUser
+  const isSuperUser = currentUser?.role === 'SUPERUSER'
+  const isAdminUser = currentUser?.role === 'ADMIN' || isSuperUser
 
   const fetchUsers = async () => {
     try {
@@ -340,7 +340,7 @@ export default function UsersTab({ currentUser }) {
 
   const handleApprove = async (id) => {
     try {
-      const res = await fetch(`/api/users/${id}/approve?requesterId=${currentUser?.id}`, { method: 'PUT' })
+      const res = await fetch(`/api/users/${id}/approve`, { method: 'PUT' })
       if (!res.ok) throw new Error('Failed to approve')
       setUsers(prev => prev.map(u => u.id === id ? { ...u, approved: true } : u))
     } catch (err) {
@@ -350,10 +350,10 @@ export default function UsersTab({ currentUser }) {
 
   const handleMakeAdmin = async (id) => {
     try {
-      const res = await fetch(`/api/users/${id}/make-admin?requesterId=${currentUser?.id}`, { method: 'PUT' })
+      const res = await fetch(`/api/users/${id}/make-admin`, { method: 'PUT' })
       if (!res.ok) throw new Error('Failed to make admin')
 
-      setUsers(prev => prev.map(u => u.id === id ? { ...u, isAdmin: true } : u))
+      setUsers(prev => prev.map(u => u.id === id ? { ...u, role: 'ADMIN' } : u))
     } catch (err) {
       alert(err.message)
     }
@@ -361,7 +361,7 @@ export default function UsersTab({ currentUser }) {
 
   const handleDelete = async (id) => {
     try {
-      const res = await fetch(`/api/users/${id}?requesterId=${currentUser?.id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/users/${id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('Failed to delete user')
       setUsers(prev => prev.filter(u => u.id !== id))
     } catch (err) {

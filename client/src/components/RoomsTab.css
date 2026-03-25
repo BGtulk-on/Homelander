@@ -59,6 +59,52 @@
   font-weight: 800;
 }
 
+.room-rename-input {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--burnt-copper);
+  font-size: 3.2rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--burnt-copper);
+  font-family: inherit;
+  outline: none;
+  padding: 0;
+  width: 100%;
+}
+
+.room-admin-actions {
+  display: flex;
+  gap: 1.2rem;
+  margin-left: 1.5rem;
+  align-items: baseline;
+}
+
+.room-action-link {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-transform: lowercase;
+  color: var(--burnt-copper);
+  opacity: 0.7;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: all 0.2s;
+}
+
+.room-action-link:hover {
+  opacity: 1;
+}
+
+.room-action-link.delete {
+  color: #d32f2f;
+}
+
+
 .room-approved-badge {
   font-size: 1rem;
   font-weight: 600;
@@ -358,3 +404,57 @@
 .room-card.expanded {
   background-color: transparent;
 }
+
+.add-room-form {
+  margin-top: 1rem;
+  width: 100%;
+  border: 1.5px dashed var(--burnt-copper);
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  box-sizing: border-box;
+  background-color: rgba(160, 67, 10, 0.02);
+}
+
+.add-room-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  font-size: 3.2rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--burnt-copper);
+  font-family: inherit;
+  outline: none;
+  padding: 0;
+}
+
+.add-room-input::placeholder {
+  color: var(--burnt-copper);
+  opacity: 0.2;
+}
+
+.add-room-btn {
+  background: var(--burnt-copper);
+  color: var(--sea-mist);
+  border: none;
+  padding: 0.8rem 1.5rem;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.add-room-btn:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+.add-room-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+

@@ -179,7 +179,7 @@ export default function Home({ user, onLogout }) {
 
   return (
     <div className="home-wrapper">
-      {(user?.isAdmin || user?.id === 1) && (
+      {(user?.role === 'ADMIN' || user?.role === 'SUPERUSER') && (
         <aside className="home-sidebar">
           <div className="home-sidebar-content">
             {renderSidebarContent()}
@@ -270,13 +270,13 @@ export default function Home({ user, onLogout }) {
             }}
           >
             <div className="profile-letter-box" ref={letterRef}>
-              {user?.firstName?.charAt(0).toUpperCase() || '?'}
+              {user?.email?.charAt(0).toUpperCase() || '?'}
             </div>
             
             <div className="profile-menu-content" ref={menuRef} style={{ visibility: 'hidden' }}>
               <div className="profile-dropdown-info">
-                <span className="profile-name">{user?.firstName} {user?.lastName}</span>
-                <span className="profile-role">{user?.isAdmin || user?.id === 1 ? 'Administrator' : 'User'}</span>
+                <span className="profile-name">{user?.email}</span>
+                <span className="profile-role">{user?.role}</span>
               </div>
               <div className="profile-dropdown-divider" />
               <button className="profile-logout-btn" onClick={onLogout}>

@@ -198,7 +198,7 @@ export default function RequestsTab({ currentUser }) {
       const request = requests.find(r => r.id === id)
       if (!request) return
 
-      const res = await fetch(`/api/requests/${id}/approve?adminId=${currentUser.id}`, {
+      const res = await fetch(`/api/requests/${id}/approve`, {
         method: 'PUT'
       })
       if (!res.ok) throw new Error('Failed to approve')
@@ -213,7 +213,7 @@ export default function RequestsTab({ currentUser }) {
 
   const handleReject = async (id) => {
     try {
-      const res = await fetch(`/api/requests/${id}/reject?adminId=${currentUser.id}`, {
+      const res = await fetch(`/api/requests/${id}/reject`, {
         method: 'PUT'
       })
       if (!res.ok) throw new Error('Failed to reject')

@@ -11,7 +11,9 @@ function App() {
   const [appPhase, setAppPhase] = useState('GATE')
 
   const handleLogin = (userData) => {
-    if (userData.isAdmin || userData.id === 1) {
+    // New role-based check from the last backend commits
+    const isAdmin = userData.role === 'ADMIN' || userData.role === 'SUPERUSER'
+    if (isAdmin) {
       setIsTransitioning(true)
       setAppPhase('TRANSITION')
       

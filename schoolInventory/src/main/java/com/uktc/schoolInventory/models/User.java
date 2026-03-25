@@ -30,8 +30,8 @@ public class User implements UserDetails {
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
-    private Role role;
+    @Column(name = "role", nullable = true)
+    private Role role = Role.USER;
 
     @Column(name = "approved")
     private Boolean approved = false;
@@ -39,9 +39,13 @@ public class User implements UserDetails {
     @Column(name = "created_at")
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
+    public Role getRole() {
+        return role != null ? role : Role.USER;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return role.getAuthorities();
+        return getRole().getAuthorities();
     }
 
     @Override public String getPassword() {return passwordHash; }
