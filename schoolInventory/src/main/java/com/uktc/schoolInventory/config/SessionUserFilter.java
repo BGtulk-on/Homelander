@@ -33,7 +33,7 @@ public class SessionUserFilter extends OncePerRequestFilter {
         // Allow if authenticated by Spring Security
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         logger.info("Authentication: {}", authentication);
-        if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal())) {
+        if (authentication != null ) {
             logger.info("Allowing access for authenticated user: {}", authentication.getPrincipal());
             filterChain.doFilter(request, response);
             return;

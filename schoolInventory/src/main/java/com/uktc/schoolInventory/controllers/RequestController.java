@@ -77,6 +77,4 @@ public class RequestController {
         request.setReturnCondition(condition);
         return ResponseEntity.ok(repository.save(request));
     }
-
-
 }

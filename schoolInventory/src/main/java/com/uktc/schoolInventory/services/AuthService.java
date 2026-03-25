@@ -1,13 +1,16 @@
 package com.uktc.schoolInventory.services;
 
+import com.uktc.schoolInventory.controllers.user.Role;
+import com.uktc.schoolInventory.dto.UserDto;
 import com.uktc.schoolInventory.dto.UserLoginDto;
 import com.uktc.schoolInventory.dto.UserRegisterDto;
-import com.uktc.schoolInventory.exception.BadRequestException;
 import com.uktc.schoolInventory.exception.DuplicateResourceException;
 import com.uktc.schoolInventory.exception.ResourceNotFoundException;
 import com.uktc.schoolInventory.exception.UnauthorizedActionException;
 import com.uktc.schoolInventory.models.User;
 import com.uktc.schoolInventory.repositories.UserRepository;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,15 +19,18 @@ import org.springframework.stereotype.Service;
 public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
 
     public AuthService(UserRepository userRepository,
-                       PasswordEncoder passwordEncoder
+                       PasswordEncoder passwordEncoder,
+                       AuthenticationManager authenticationManager
     ){
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
     }
 
-    public User register(UserRegisterDto input){
+    public UserDto register(UserRegisterDto input){
         if (userRepository.findByEmail(input.getEmail()).isPresent()) {
             throw new DuplicateResourceException("A user with this email already exists");
         }
@@ -33,26 +39,21 @@ public class AuthService {
         user.setLastName(input.getLast_name());
         user.setEmail(input.getEmail());
         user.setPasswordHash(passwordEncoder.encode(input.getPassword()));
-        user.setIsAdmin(false);
+        user.setRole(Role.USER);
 
-        return userRepository.save(user);
+        User saveduser = userRepository.save(user);
+        return new UserDto(saveduser);
 
     }
 
-    public User authenticate(UserLoginDto input){
+    public UserDto authenticate(UserLoginDto input){
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(input.getEmail(), input.getPassword())
+        );
+
         User user = userRepository.findByEmail(input.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("No account found with that email address"));
 
-        if (!passwordEncoder.matches(input.getPassword(), user.getPasswordHash())) {
-            throw new BadRequestException("Incorrect email or password");
-        }
-
-        if (user.getApproved() == null || !user.getApproved()) {
-            throw new UnauthorizedActionException("Your account is pending approval.");
-        }
-
-        return user;
+        return new UserDto(user);
     }
 }
-
-

@@ -1,13 +1,18 @@
 package com.uktc.schoolInventory.models;
 
+import com.uktc.schoolInventory.controllers.user.Role;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import java.time.OffsetDateTime;
+import java.util.Collection;
 
 @Entity
 @Table(name = "users") // Свързва се с таблицата users в SQL [cite: 58]
 @Data // Lombok автоматично прави getter/setter
-public class User {
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,12 +29,25 @@ public class User {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @Column(name = "isadmin")
-    private Boolean isAdmin = false;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private Role role;
 
     @Column(name = "approved")
     private Boolean approved = false;
 
     @Column(name = "created_at")
     private OffsetDateTime createdAt = OffsetDateTime.now();
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return role.getAuthorities();
+    }
+
+    @Override public String getPassword() {return passwordHash; }
+    @Override public String getUsername() {return email; }
+    @Override public boolean isAccountNonExpired() {return true; }
+    @Override public boolean isAccountNonLocked() {return true; }
+    @Override public boolean isCredentialsNonExpired() {return true; }
+    @Override public boolean isEnabled() {return true; }
 }

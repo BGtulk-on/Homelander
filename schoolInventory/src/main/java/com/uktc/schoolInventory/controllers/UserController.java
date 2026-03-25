@@ -1,9 +1,11 @@
 package com.uktc.schoolInventory.controllers;
 
+import com.uktc.schoolInventory.controllers.user.Role;
 import com.uktc.schoolInventory.exception.ResourceNotFoundException;
 import com.uktc.schoolInventory.exception.UnauthorizedActionException;
 import com.uktc.schoolInventory.models.User;
 import com.uktc.schoolInventory.repositories.UserRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -18,21 +20,21 @@ public class UserController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('SUPERUSER') or hasRole('ADMIN')")
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('SUPERUSER') or hasRole('ADMIN')")
     public User createUser(@RequestBody User user) {
         return userRepository.save(user);
     }
 
     // Approve registration
     @PutMapping("/{id}/approve")
-    public String approveUser(@PathVariable Long id, @RequestParam Long requesterId) {
-        if (!requesterId.equals(1L)) {
-            throw new UnauthorizedActionException("Only the Superuser can approve registrations");
-        }
+    @PreAuthorize("hasRole('SUPERUSER') or hasRole('ADMIN')")
+    public String approveUser(@PathVariable Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         user.setApproved(true);
@@ -42,23 +44,19 @@ public class UserController {
 
     // Grant admin rights
     @PutMapping("/{id}/make-admin")
-    public String makeAdmin(@PathVariable Long id, @RequestParam Long requesterId) {
-        if (!requesterId.equals(1L)) {
-            throw new UnauthorizedActionException("Only the Superuser can grant admin rights");
-        }
+    @PreAuthorize("hasRole('SUPERUSER')")
+    public String makeAdmin(@PathVariable Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-        user.setIsAdmin(true);
+        user.setRole(Role.ADMIN);
         userRepository.save(user);
         return "User " + user.getFirstName() + " is now an administrator.";
     }
 
     // Delete user
     @DeleteMapping("/{id}")
-    public String deleteUser(@PathVariable Long id, @RequestParam Long requesterId) {
-        if (!requesterId.equals(1L)) {
-            throw new UnauthorizedActionException("Only the Superuser can delete users");
-        }
+    @PreAuthorize("hasRole('SUPERUSER') or hasRole('ADMIN')")
+    public String deleteUser(@PathVariable Long id) {
         if (!userRepository.existsById(id)) {
             throw new ResourceNotFoundException("User not found with id: " + id);
         }

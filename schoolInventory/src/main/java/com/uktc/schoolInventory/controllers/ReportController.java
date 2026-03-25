@@ -3,6 +3,7 @@ package com.uktc.schoolInventory.controllers;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import com.uktc.schoolInventory.controllers.user.Role;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -90,7 +91,7 @@ public class ReportController {
 
     private boolean isAdmin(Long userId) {
         return userRepository.findById(userId)
-                .map(User::getIsAdmin)
+                .map(user -> user.getRole() == Role.ADMIN || user.getRole() == Role.SUPERUSER)
                 .orElse(false);
     }
 
