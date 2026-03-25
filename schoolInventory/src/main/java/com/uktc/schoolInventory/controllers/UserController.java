@@ -35,6 +35,8 @@ public class UserController {
         }
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        user.setApproved(true);
+        userRepository.save(user);
         return "User " + user.getFirstName() + " approved successfully.";
     }
 
