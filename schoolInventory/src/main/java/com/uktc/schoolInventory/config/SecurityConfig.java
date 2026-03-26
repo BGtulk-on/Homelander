@@ -28,7 +28,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
                         .anyRequest().authenticated()
                 )
-                .httpBasic(withDefaults())
+//                .httpBasic(withDefaults())
                 .formLogin(form -> form
                         .successHandler(successHandler) // Слагаме нашия нов Handler тук
                         .permitAll()

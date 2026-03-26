@@ -56,7 +56,7 @@ export default function AccessGate({ onLogin, isExiting }) {
           })
         })
 
-        if (!response.ok) {
+        if (!response.status === 302) {
           let errorMessage = 'Invalid credentials'
           try {
             const errorJson = await response.json()

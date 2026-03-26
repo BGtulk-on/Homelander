@@ -1,5 +1,6 @@
 .DS_Store
 .agents
+.idea
 client/node_modules
 client/dist
 client/.vite
@@ -11,3 +12,10 @@ schoolInventory/reports/
 
 # Build artifacts
 schoolInventory/bin/
+
+pgdata/
+
+Thumbs.db
+.DS_Store
+
+*.log

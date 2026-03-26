@@ -1,11 +1,13 @@
 package com.uktc.schoolInventory.controllers;
 
 import com.uktc.schoolInventory.dto.UserLoginDto;
+import com.uktc.schoolInventory.dto.UserRegisterDto;
 import com.uktc.schoolInventory.dto.response.LoginResponse;
 import com.uktc.schoolInventory.models.User;
 import com.uktc.schoolInventory.services.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -27,7 +29,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody UserLoginDto userLoginDto, HttpSession session, HttpServletRequest request){
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody UserLoginDto userLoginDto, HttpSession session, HttpServletRequest request){
         User authendicatedUser = authService.authenticate(userLoginDto);
 
         session.setAttribute("userId",authendicatedUser.getId());
@@ -51,5 +53,11 @@ public class AuthController {
                 authendicatedUser.getIsAdmin()
         );
         return ResponseEntity.ok(loginResponse);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@Valid @RequestBody UserRegisterDto userRegisterDto) {
+        authService.register(userRegisterDto);
+        return ResponseEntity.ok().build();
     }
 }
