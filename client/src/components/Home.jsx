@@ -108,8 +108,8 @@ export default function Home({ user, onLogout }) {
       const header = area.querySelector('.dashboard-sticky-header')
       if (header) {
         gsap.to(header, {
-          paddingTop: (4 - 3.2 * progress) + 'rem',
-          paddingBottom: (1 - 0.5 * progress) + 'rem',
+          paddingTop: (4 - 2 * progress) + 'rem',
+          paddingBottom: (1 - 0.2 * progress) + 'rem',
           duration: 0.1,
           overwrite: 'auto',
           ease: 'power1.out'
@@ -134,9 +134,9 @@ export default function Home({ user, onLogout }) {
         ease: 'power2.in' 
       })
       .to(profileRef.current, {
-        width: 220,
-        height: 140,
-        borderRadius: '12px',
+        width: 320,
+        height: 180,
+        borderRadius: '20px',
         duration: 0.45,
         ease: 'power4.inOut'
       }, '-=0.1')
@@ -274,19 +274,45 @@ export default function Home({ user, onLogout }) {
             </div>
             
             <div className="profile-menu-content" ref={menuRef} style={{ visibility: 'hidden' }}>
-              <div className="profile-dropdown-info">
-                <span className="profile-name">{user?.email}</span>
-                <span className="profile-role">{user?.role}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div className="profile-dropdown-info">
+                  <span className="profile-name">{user?.email}</span>
+                  <span className="profile-role">{user?.role}</span>
+                </div>
+                <button 
+                  className="profile-logout-btn" 
+                  onClick={onLogout}
+                  style={{ padding: '0.4rem', borderRadius: '50%', background: 'rgba(223,232,230,0.1)' }}
+                  title="Logout"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                </button>
               </div>
+              
               <div className="profile-dropdown-divider" />
-              <button className="profile-logout-btn" onClick={onLogout}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                  <polyline points="16 17 21 12 16 7" />
-                  <line x1="21" y1="12" x2="9" y2="12" />
-                </svg>
-                Logout
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <span className="profile-role" style={{ fontSize: '0.6rem', marginBottom: '2px' }}>MY LOAN HISTORY</span>
+                <div style={{ display: 'flex', gap: '5px' }}>
+                  <button 
+                    className="profile-logout-btn" 
+                    onClick={(e) => { e.stopPropagation(); window.location.href=`/reports/my/export?userId=${user.id}&format=csv` }}
+                    style={{ fontSize: '0.7rem', padding: '0.4rem', flex: 1, justifyContent: 'center' }}
+                  >
+                    CSV
+                  </button>
+                  <button 
+                    className="profile-logout-btn" 
+                    onClick={(e) => { e.stopPropagation(); window.location.href=`/reports/my/export?userId=${user.id}&format=pdf` }}
+                    style={{ fontSize: '0.7rem', padding: '0.4rem', flex: 1, justifyContent: 'center' }}
+                  >
+                    PDF
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </header>

@@ -9,6 +9,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class LoginResponse {
+    private Long id;
     private String email;
     private Role role;
 }

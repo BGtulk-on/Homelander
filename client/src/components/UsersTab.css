@@ -3,7 +3,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 0 1.5rem; /* Larger, fixed side space */
+  padding: 0 1.5rem;
   box-sizing: border-box;
 }
 
@@ -11,7 +11,7 @@
   margin-bottom: 0.8rem;
   width: 100%;
   box-sizing: border-box;
-  flex-shrink: 0; /* Don't squash search */
+  flex-shrink: 0;
 }
 
 .users-tab-search {
@@ -42,8 +42,8 @@
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: none;
-  flex: 1; /* Take all remaining space */
-  min-height: 0; /* Allow scrolling */
+  flex: 1;
+  min-height: 0;
 }
 
 .users-tab-list::-webkit-scrollbar {
@@ -54,7 +54,7 @@
   width: 100%;
   box-sizing: border-box;
   border: 2.5px solid #A0430A;
-  border-radius: 6px; /* Smaller base radius for middle items */
+  border-radius: 6px;
   background: rgba(255, 255, 255, 0.02);
   transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease;
   flex-shrink: 0;
@@ -195,8 +195,8 @@
 }
 
 .users-tab-action-btn:hover {
-  background: #A0430A;
-  color: #DFE8E6;
+  background: rgba(160, 67, 10, 0.08);
+  border-color: #A0430A;
 }
 
 .users-tab-loading,
@@ -206,4 +206,18 @@
   text-align: center;
   color: #A0430A;
   font-weight: 500;
+}
+
+.users-tab-export-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 0.8rem;
+  width: 100%;
+}
+
+.users-tab-action-btn.export {
+  font-size: 0.75rem;
+  padding: 0.3rem 0.6rem;
+  border-style: dashed;
 }

@@ -53,6 +53,7 @@ public class AuthController {
         session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
 
         LoginResponse loginResponse = new LoginResponse(
+                authendicatedUser.getId(),
                 authendicatedUser.getEmail(),
                 authendicatedUser.getRole()
         );

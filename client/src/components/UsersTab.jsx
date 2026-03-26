@@ -48,7 +48,7 @@ function ActionConfirmBtn({ actionText, confirmText, onClick, disabled }) {
   )
 }
 
-function UserItem({ user, index, isExpanded, onToggle, onMakeAdmin, onApprove, onDelete, showActions, isSuperUser }) {
+function UserItem({ user, index, isExpanded, onToggle, onMakeAdmin, onApprove, onDelete, showActions, isSuperUser, currentUser }) {
   const bodyRef = useRef(null)
   const containerRef = useRef(null)
   const badgeRef = useRef(null)
@@ -259,6 +259,23 @@ function UserItem({ user, index, isExpanded, onToggle, onMakeAdmin, onApprove, o
         </div>
 
         <div className="users-tab-actions">
+          <div className="users-tab-export-section">
+            <span style={{ fontSize: '0.65rem', fontWeight: 'bold', marginBottom: '0.3rem', display: 'block' }}>REPORT: EQUIPMENT LOAN HISTORY</span>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button 
+                className="users-tab-action-btn export" 
+                onClick={(e) => { e.stopPropagation(); window.location.href=`/reports/user/${user.id}/export?requestingUserId=${currentUser.id}&format=csv` }}
+              >
+                CSV
+              </button>
+              <button 
+                className="users-tab-action-btn export" 
+                onClick={(e) => { e.stopPropagation(); window.location.href=`/reports/user/${user.id}/export?requestingUserId=${currentUser.id}&format=pdf` }}
+              >
+                PDF
+              </button>
+            </div>
+          </div>
           {showActions && (
             <>
               {user.role !== 'ADMIN' && user.role !== 'SUPERUSER' && (
@@ -310,7 +327,7 @@ export default function UsersTab({ currentUser }) {
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [expandedId, setExpandedId] = useState(null)
-
+  const [showExportButtons, setShowExportButtons] = useState(false)
   const listRef = useRef(null)
   const hasAnimatedInRef = useRef(false)
 
@@ -411,6 +428,7 @@ export default function UsersTab({ currentUser }) {
                 onDelete={handleDelete}
                 showActions={isSuperUser && currentUser?.id !== user.id}
                 isSuperUser={isSuperUser}
+                currentUser={currentUser}
               />
             </LazyItem>
           ))}

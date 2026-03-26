@@ -16,4 +16,6 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
 
     // Намираме всички заявки на даден потребител
     List<Request> findAllByUser_Id(Long userId);
+
+    List<Request> findAllByEquipment_Id(Long equipmentId);
 }

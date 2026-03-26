@@ -47,8 +47,9 @@ public class ReportService {
     @Transactional(readOnly = true)
     public byte[] exportCsvForUser(Long userId) throws IOException {
         List<ReportRowDto> rows = getReportForUser(userId);
-        
-        String[] headers = {"Equipment", "Type", "Serial", "Requested At", "Return Deadline", "Actual Return", "Condition"};
+
+        String[] headers = { "Equipment", "Type", "Serial", "Requested At", "Return Deadline", "Actual Return",
+                "Condition" };
 
         StringWriter sw = new StringWriter();
         try (CSVPrinter printer = new CSVPrinter(sw, CSVFormat.DEFAULT.builder().setHeader(headers).build())) {
@@ -100,7 +101,7 @@ public class ReportService {
     @Transactional(readOnly = true)
     public byte[] exportCsvForEquipment(Long equipmentId) throws IOException {
         List<ReportRowDto> rows = getReportForEquipment(equipmentId);
-        String[] headers = {"Requested By", "Email", "Requested At", "Return Deadline", "Actual Return", "Condition"};
+        String[] headers = { "Requested By", "Email", "Requested At", "Return Deadline", "Actual Return", "Condition" };
 
         StringWriter sw = new StringWriter();
         try (CSVPrinter printer = new CSVPrinter(sw, CSVFormat.DEFAULT.builder().setHeader(headers).build())) {
@@ -153,13 +154,13 @@ public class ReportService {
     // ==================== Helpers ====================
 
     private List<ReportRowDto> getReportForUser(Long userId) {
-        List<Request> returned = requestRepository.findByUserIdAndRequestStatus(userId, RequestStatusType.RETURNED);
-        return buildReportRows(returned);
+        List<Request> allUserRequests = requestRepository.findAllByUser_Id(userId);
+        return buildReportRows(allUserRequests);
     }
 
     private List<ReportRowDto> getReportForEquipment(Long equipmentId) {
-        List<Request> returned = requestRepository.findByEquipmentIdAndRequestStatus(equipmentId, RequestStatusType.RETURNED);
-        return buildReportRows(returned);
+        List<Request> allEquipmentRequests = requestRepository.findAllByEquipment_Id(equipmentId);
+        return buildReportRows(allEquipmentRequests);
     }
 
     private List<ReportRowDto> buildReportRows(List<Request> requests) {
@@ -169,14 +170,17 @@ public class ReportService {
             Equipment equip = r.getEquipment();
 
             if (user != null && equip != null) {
-                String userName = user.getFirstName() + " " + (user.getLastName() != null ? user.getLastName() : "").trim();
+                String userName = user.getFirstName() + " "
+                        + (user.getLastName() != null ? user.getLastName() : "").trim();
                 String userEmail = user.getEmail();
                 String eqName = equip.getName();
-                String eqType = equip.getType() != null ? equip.getType().getTypeName() : (equip.getTypeId() != null ? "Type " + equip.getTypeId() : "");
+                String eqType = equip.getType() != null ? equip.getType().getTypeName()
+                        : (equip.getTypeId() != null ? "Type " + equip.getTypeId() : "");
                 String serial = equip.getSerialNumber() != null ? equip.getSerialNumber() : "";
 
                 rows.add(ReportRowDto.forUserReport(userName, userEmail, eqName, eqType, serial,
-                        convertToLocalDateTime(r.getRequestedStartDate()), convertToLocalDateTime(r.getRequestedEndDate()),
+                        convertToLocalDateTime(r.getRequestedStartDate()),
+                        convertToLocalDateTime(r.getRequestedEndDate()),
                         convertToLocalDateTime(r.getActualReturnDate()),
                         r.getReturnCondition() != null ? r.getReturnCondition().toString() : ""));
             }
