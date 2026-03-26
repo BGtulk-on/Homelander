@@ -28,14 +28,13 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserDto> register(@RequestBody UserRegisterDto userRegisterDto){
+    public ResponseEntity<UserDto> register(@jakarta.validation.Valid @RequestBody UserRegisterDto userRegisterDto){
         UserDto registeredUser = authService.register(userRegisterDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(registeredUser);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody UserLoginDto userLoginDto, HttpSession session, HttpServletRequest request){
-
+    public ResponseEntity<LoginResponse> login(@jakarta.validation.Valid @RequestBody UserLoginDto userLoginDto, HttpSession session, HttpServletRequest request){
         UserDto authendicatedUser = authService.authenticate(userLoginDto);
 
         session.setAttribute("userId", authendicatedUser.getId());
