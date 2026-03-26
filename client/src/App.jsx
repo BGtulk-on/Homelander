@@ -4,6 +4,8 @@ import AccessGate from './components/AccessGate'
 import Home from './components/Home'
 import './index.css'
 
+const API_BASE_URL = 'homelander-uktc-dydzf7dafpg4cwb3.swedencentral-01.azurewebsites.net';
+
 function App() {
   const [user, setUser] = useState(null)
   const [isTransitioning, setIsTransitioning] = useState(false)
