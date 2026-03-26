@@ -3,6 +3,7 @@ import gsap from 'gsap'
 import ZoomableImage from './ZoomableImage'
 import LazyItem from './LazyItem'
 import './EquipmentTab.css'
+import { sanitizeInput } from '../utils/sanitizer'
 
 function ActionConfirmBtn({ actionText, confirmText, onClick, disabled }) {
   const [isConfirming, setIsConfirming] = useState(false)
@@ -49,7 +50,7 @@ function ActionConfirmBtn({ actionText, confirmText, onClick, disabled }) {
   )
 }
 
-function EquipmentItem({ item, index, isExpanded, onToggle, onDelete, onUpdate, onAssign, users, locations }) {
+function EquipmentItem({ item, index, isExpanded, onToggle, onDelete, onUpdate, onAssign, users, locations, currentUser }) {
   const bodyRef = useRef(null)
   const containerRef = useRef(null)
   const actionsRef = useRef(null)
@@ -263,7 +264,7 @@ function EquipmentItem({ item, index, isExpanded, onToggle, onDelete, onUpdate, 
               className="edit-input" 
               value={editedItem.name} 
               onClick={e => e.stopPropagation()}
-              onChange={e => setEditedItem({ ...editedItem, name: e.target.value })}
+              onChange={e => setEditedItem({ ...editedItem, name: sanitizeInput(e.target.value) })}
               style={{ fontSize: '1.1rem', fontWeight: 600, padding: '2px 4px' }}
             />
           ) : (
@@ -287,7 +288,7 @@ function EquipmentItem({ item, index, isExpanded, onToggle, onDelete, onUpdate, 
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 9h16"/><path d="M4 15h16"/><path d="M10 3L8 21"/><path d="M16 3l-2 18"/></svg>
               </span>
               {isEditing ? (
-                <input className="edit-input" value={editedItem.serialNumber} onChange={e => setEditedItem({ ...editedItem, serialNumber: e.target.value })} />
+                <input className="edit-input" value={editedItem.serialNumber} onChange={e => setEditedItem({ ...editedItem, serialNumber: sanitizeInput(e.target.value) })} />
               ) : (
                 <span className="info-value">{item.serialNumber}</span>
               )}
@@ -347,7 +348,8 @@ function EquipmentItem({ item, index, isExpanded, onToggle, onDelete, onUpdate, 
                     className="edit-input" 
                     value={editedItem.assignedTo || ''} 
                     onChange={e => {
-                      setEditedItem({ ...editedItem, assignedTo: e.target.value })
+                      const sanitized = sanitizeInput(e.target.value)
+                      setEditedItem({ ...editedItem, assignedTo: sanitized })
                       setShowSuggestions(true)
                     }}
                     onFocus={() => setShowSuggestions(true)}
@@ -374,7 +376,7 @@ function EquipmentItem({ item, index, isExpanded, onToggle, onDelete, onUpdate, 
                 <span className="info-icon">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                 </span>
-                <input className="edit-input" value={editedItem.photoUrl || ''} onChange={e => setEditedItem({ ...editedItem, photoUrl: e.target.value })} placeholder="Image URL" />
+                <input className="edit-input" value={editedItem.photoUrl || ''} onChange={e => setEditedItem({ ...editedItem, photoUrl: sanitizeInput(e.target.value) })} placeholder="Image URL" />
               </div>
             </div>
           </div>
@@ -391,7 +393,27 @@ function EquipmentItem({ item, index, isExpanded, onToggle, onDelete, onUpdate, 
           </div>
 
           <div className="equip-tab-actions" ref={actionsRef}>
-          <div className="edit-logic-container">
+            <div style={{ padding: '0 0.5rem', marginBottom: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+              <span style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#A0430A', opacity: 0.8 }}>HISTORY REPORT</span>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button 
+                  className="users-tab-action-btn export" 
+                  style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', borderStyle: 'dashed', flex: 1, justifyContent: 'center' }}
+                  onClick={(e) => { e.stopPropagation(); window.location.href=`/reports/equipment/${item.id}/export?requestingUserId=${currentUser.id}&format=csv` }}
+                >
+                  CSV
+                </button>
+                <button 
+                  className="users-tab-action-btn export" 
+                  style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', borderStyle: 'dashed', flex: 1, justifyContent: 'center' }}
+                  onClick={(e) => { e.stopPropagation(); window.location.href=`/reports/equipment/${item.id}/export?requestingUserId=${currentUser.id}&format=pdf` }}
+                >
+                  PDF
+                </button>
+              </div>
+            </div>
+
+            <div className="edit-logic-container">
             <button className="equip-tab-action-btn edit-main-btn" onClick={() => setIsEditing(true)} disabled={isRemoving}>
               <span className="btn-text">Edit</span>
             </button>
@@ -411,7 +433,7 @@ function EquipmentItem({ item, index, isExpanded, onToggle, onDelete, onUpdate, 
   )
 }
 
-export default function EquipmentTab({ onEquipmentChange }) {
+export default function EquipmentTab({ onEquipmentChange, currentUser }) {
   const [equipment, setEquipment] = useState([])
   const [users, setUsers] = useState([])
   const [locations, setLocations] = useState([])
@@ -539,7 +561,27 @@ export default function EquipmentTab({ onEquipmentChange }) {
   return (
     <div className="equip-tab-container">
       <div className="equip-tab-search-wrapper">
-        <input type="text" className="equip-tab-search" placeholder="search equipment" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+        <input type="text" className="equip-tab-search" placeholder="search equipment" value={searchQuery} onChange={(e) => setSearchQuery(sanitizeInput(e.target.value))} />
+      </div>
+
+      <div style={{ padding: '0 0.5rem', marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+        <span style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#A0430A', opacity: 0.8 }}>INVENTORY REPORT (ALL)</span>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button 
+            className="users-tab-action-btn export" 
+            style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem', borderStyle: 'dashed', flex: 1, justifyContent: 'center' }}
+            onClick={() => window.location.href=`/reports/equipment/all/export?requestingUserId=${currentUser.id}&format=csv`}
+          >
+            CSV
+          </button>
+          <button 
+            className="users-tab-action-btn export" 
+            style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem', borderStyle: 'dashed', flex: 1, justifyContent: 'center' }}
+            onClick={() => window.location.href=`/reports/equipment/all/export?requestingUserId=${currentUser.id}&format=pdf`}
+          >
+            PDF
+          </button>
+        </div>
       </div>
 
       <div className="equip-tab-add-wrapper">
@@ -548,8 +590,8 @@ export default function EquipmentTab({ onEquipmentChange }) {
         </button>
         <div ref={formRef} className="equip-tab-add-form-container" style={{ height: 0, opacity: 0, overflow: 'hidden' }}>
           <form className="equip-tab-add-form" onSubmit={handleAdd}>
-            <input type="text" placeholder="Name" value={newEquip.name} onChange={e => setNewEquip({...newEquip, name: e.target.value})} required />
-            <input type="text" placeholder="Serial Number" value={newEquip.serialNumber} onChange={e => setNewEquip({...newEquip, serialNumber: e.target.value})} required />
+            <input type="text" placeholder="Name" value={newEquip.name} onChange={e => setNewEquip({...newEquip, name: sanitizeInput(e.target.value)})} required />
+            <input type="text" placeholder="Serial Number" value={newEquip.serialNumber} onChange={e => setNewEquip({...newEquip, serialNumber: sanitizeInput(e.target.value)})} required />
             <div className="equip-tab-form-row">
               <select value={newEquip.typeId} onChange={e => setNewEquip({...newEquip, typeId: parseInt(e.target.value)})}>
                 <option value={1}>Laptop</option><option value={2}>Projector</option><option value={3}>Camera</option><option value={4}>Tablet</option>
@@ -568,8 +610,8 @@ export default function EquipmentTab({ onEquipmentChange }) {
                 <option value="Available">Available</option><option value="Checked_Out">Checked Out</option><option value="Under_Repair">Under Repair</option><option value="Retired">Retired</option>
               </select>
             </div>
-            <input type="text" placeholder="Assign To (Optional)" value={newEquip.assignedTo} onChange={e => setNewEquip({...newEquip, assignedTo: e.target.value})} />
-            <input type="text" placeholder="Photo URL (Optional)" value={newEquip.photoUrl} onChange={e => setNewEquip({...newEquip, photoUrl: e.target.value})} />
+            <input type="text" placeholder="Assign To (Optional)" value={newEquip.assignedTo} onChange={e => setNewEquip({...newEquip, assignedTo: sanitizeInput(e.target.value)})} />
+            <input type="text" placeholder="Photo URL (Optional)" value={newEquip.photoUrl} onChange={e => setNewEquip({...newEquip, photoUrl: sanitizeInput(e.target.value)})} />
             <button type="submit" className="equip-tab-submit-btn">Save Equipment</button>
           </form>
         </div>
@@ -588,6 +630,7 @@ export default function EquipmentTab({ onEquipmentChange }) {
                 isExpanded={expandedId === item.id} 
                 onToggle={id => setExpandedId(expandedId === id ? null : id)}
                 onDelete={handleDelete} onUpdate={handleUpdate} onAssign={handleAssign} users={users} locations={locations}
+                currentUser={currentUser}
               />
             </LazyItem>
           )) : (

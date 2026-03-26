@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import LaptopModel from './LaptopModel'
 import gsap from 'gsap'
 import './AccessGate.css'
+import { sanitizeInput } from '../utils/sanitizer'
 
 export default function AccessGate({ onLogin, isExiting }) {
   const [wantsExistingAccess, setWantsExistingAccess] = useState(true)
@@ -120,8 +121,9 @@ export default function AccessGate({ onLogin, isExiting }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-    setActiveInputValue(value)
+    const sanitizedValue = sanitizeInput(value)
+    setFormData(prev => ({ ...prev, [name]: sanitizedValue }))
+    setActiveInputValue(sanitizedValue)
   }
 
   return (

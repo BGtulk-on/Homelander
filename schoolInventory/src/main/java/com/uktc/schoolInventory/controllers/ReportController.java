@@ -68,6 +68,44 @@ public class ReportController {
     }
 
     /**
+     * Admin-only: export all equipment report.
+     * GET /reports/equipment/all/export?requestingUserId=1&format=csv
+     */
+    @GetMapping("/equipment/all/export")
+    public ResponseEntity<?> exportAllEquipmentReport(
+            @RequestParam Long requestingUserId,
+            @RequestParam(defaultValue = "csv") String format) {
+        if (!isAdmin(requestingUserId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only admins can access equipment reports");
+        }
+        try {
+            return buildAllEquipmentFileResponse(format);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Export failed: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Admin-only: export all requests report.
+     * GET /reports/requests/all/export?requestingUserId=1&format=pdf
+     */
+    @GetMapping("/requests/all/export")
+    public ResponseEntity<?> exportAllRequestsReport(
+            @RequestParam Long requestingUserId,
+            @RequestParam(defaultValue = "csv") String format) {
+        if (!isAdmin(requestingUserId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only admins can access request reports");
+        }
+        try {
+            return buildAllRequestsFileResponse(format);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Export failed: " + e.getMessage());
+        }
+    }
+
+    /**
      * Admin-only: export a specific equipment's report.
      * GET /reports/equipment/3/export?requestingUserId=1&format=csv
      */
@@ -106,6 +144,48 @@ public class ReportController {
             mediaType = MediaType.APPLICATION_PDF;
         } else {
             content = reportService.exportCsvForUser(userId);
+            mediaType = MediaType.parseMediaType("text/csv");
+        }
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(mediaType)
+                .contentLength(content.length)
+                .body(content);
+    }
+
+    private ResponseEntity<byte[]> buildAllEquipmentFileResponse(String format) throws Exception {
+        String timestamp = LocalDateTime.now().format(TIMESTAMP_FORMAT);
+        String filename = String.format("all_equipment_%s.%s", timestamp, format);
+
+        byte[] content;
+        MediaType mediaType;
+        if ("pdf".equalsIgnoreCase(format)) {
+            content = reportService.exportPdfForAllEquipment();
+            mediaType = MediaType.APPLICATION_PDF;
+        } else {
+            content = reportService.exportCsvForAllEquipment();
+            mediaType = MediaType.parseMediaType("text/csv");
+        }
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(mediaType)
+                .contentLength(content.length)
+                .body(content);
+    }
+
+    private ResponseEntity<byte[]> buildAllRequestsFileResponse(String format) throws Exception {
+        String timestamp = LocalDateTime.now().format(TIMESTAMP_FORMAT);
+        String filename = String.format("all_requests_%s.%s", timestamp, format);
+
+        byte[] content;
+        MediaType mediaType;
+        if ("pdf".equalsIgnoreCase(format)) {
+            content = reportService.exportPdfForAllRequests();
+            mediaType = MediaType.APPLICATION_PDF;
+        } else {
+            content = reportService.exportCsvForAllRequests();
             mediaType = MediaType.parseMediaType("text/csv");
         }
 

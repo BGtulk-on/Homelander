@@ -35,11 +35,113 @@ import com.uktc.schoolInventory.repositories.RequestRepository;
 public class ReportService {
 
     private final RequestRepository requestRepository;
+    private final com.uktc.schoolInventory.repositories.EquipmentRepository equipmentRepository;
 
     private static final DateTimeFormatter FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-    public ReportService(RequestRepository requestRepository) {
+    public ReportService(RequestRepository requestRepository, com.uktc.schoolInventory.repositories.EquipmentRepository equipmentRepository) {
         this.requestRepository = requestRepository;
+        this.equipmentRepository = equipmentRepository;
+    }
+
+    // ==================== All Equipment Reports ====================
+
+    @Transactional(readOnly = true)
+    public byte[] exportCsvForAllEquipment() throws IOException {
+        List<Equipment> items = equipmentRepository.findAll();
+        String[] headers = { "Name", "Type", "Serial", "Location", "Status", "Condition", "Assigned To" };
+
+        StringWriter sw = new StringWriter();
+        try (CSVPrinter printer = new CSVPrinter(sw, CSVFormat.DEFAULT.builder().setHeader(headers).build())) {
+            for (Equipment e : items) {
+                printer.printRecord(
+                    e.getName(), 
+                    e.getType() != null ? e.getType().getTypeName() : "N/A",
+                    e.getSerialNumber(),
+                    e.getLocation() != null ? e.getLocation().getRoomName() : "N/A",
+                    e.getStatus(),
+                    e.getCurrentCondition(),
+                    e.getAssignedTo()
+                );
+            }
+        }
+        return sw.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] exportPdfForAllEquipment() throws DocumentException {
+        List<Equipment> items = equipmentRepository.findAll();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (Document document = new Document(PageSize.A4.rotate())) {
+            PdfWriter.getInstance(document, out);
+            document.open();
+            document.add(new Paragraph("All Equipment Inventory Report", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)));
+            document.add(new Paragraph(" "));
+            PdfPTable table = new PdfPTable(7);
+            table.setWidthPercentage(100);
+            table.addCell("Name"); table.addCell("Type"); table.addCell("Serial"); table.addCell("Location");
+            table.addCell("Status"); table.addCell("Condition"); table.addCell("Assigned");
+            for (Equipment e : items) {
+                addCell(table, e.getName());
+                addCell(table, e.getType() != null ? e.getType().getTypeName() : "");
+                addCell(table, e.getSerialNumber());
+                addCell(table, e.getLocation() != null ? e.getLocation().getRoomName() : "");
+                addCell(table, e.getStatus() != null ? e.getStatus().toString() : "");
+                addCell(table, e.getCurrentCondition() != null ? e.getCurrentCondition().toString() : "");
+                addCell(table, e.getAssignedTo());
+            }
+            document.add(table);
+        }
+        return out.toByteArray();
+    }
+
+    // ==================== All Requests Reports ====================
+
+    @Transactional(readOnly = true)
+    public byte[] exportCsvForAllRequests() throws IOException {
+        List<Request> items = requestRepository.findAll();
+        String[] headers = { "User", "Equipment", "Status", "Requested At", "Deadline", "Returned At" };
+
+        StringWriter sw = new StringWriter();
+        try (CSVPrinter printer = new CSVPrinter(sw, CSVFormat.DEFAULT.builder().setHeader(headers).build())) {
+            for (Request r : items) {
+                printer.printRecord(
+                    r.getUser() != null ? r.getUser().getEmail() : "N/A",
+                    r.getEquipment() != null ? r.getEquipment().getName() : "N/A",
+                    r.getRequestStatus(),
+                    fmt(convertToLocalDateTime(r.getRequestedStartDate())),
+                    fmt(convertToLocalDateTime(r.getRequestedEndDate())),
+                    fmt(convertToLocalDateTime(r.getActualReturnDate()))
+                );
+            }
+        }
+        return sw.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] exportPdfForAllRequests() throws DocumentException {
+        List<Request> items = requestRepository.findAll();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (Document document = new Document(PageSize.A4.rotate())) {
+            PdfWriter.getInstance(document, out);
+            document.open();
+            document.add(new Paragraph("All Equipment Requests Report", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)));
+            document.add(new Paragraph(" "));
+            PdfPTable table = new PdfPTable(6);
+            table.setWidthPercentage(100);
+            table.addCell("User"); table.addCell("Equipment"); table.addCell("Status");
+            table.addCell("Requested At"); table.addCell("Deadline"); table.addCell("Returned At");
+            for (Request r : items) {
+                addCell(table, r.getUser() != null ? r.getUser().getEmail() : "");
+                addCell(table, r.getEquipment() != null ? r.getEquipment().getName() : "");
+                addCell(table, r.getRequestStatus() != null ? r.getRequestStatus().toString() : "");
+                addCell(table, fmt(convertToLocalDateTime(r.getRequestedStartDate())));
+                addCell(table, fmt(convertToLocalDateTime(r.getRequestedEndDate())));
+                addCell(table, fmt(convertToLocalDateTime(r.getActualReturnDate())));
+            }
+            document.add(table);
+        }
+        return out.toByteArray();
     }
 
     // ==================== Per-User Reports ====================

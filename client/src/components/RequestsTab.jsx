@@ -233,6 +233,26 @@ export default function RequestsTab({ currentUser }) {
       <div className="requests-tab-title-wrapper">
         <h2 className="requests-tab-title">Requests</h2>
       </div>
+
+      <div style={{ padding: '0 0.5rem', marginBottom: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+        <span style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#A0430A', opacity: 0.8 }}>ALL REQUESTS REPORT</span>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button 
+            className="users-tab-action-btn export" 
+            style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem', borderStyle: 'dashed', flex: 1, justifyContent: 'center' }}
+            onClick={() => window.location.href=`/reports/requests/all/export?requestingUserId=${currentUser.id}&format=csv`}
+          >
+            CSV
+          </button>
+          <button 
+            className="users-tab-action-btn export" 
+            style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem', borderStyle: 'dashed', flex: 1, justifyContent: 'center' }}
+            onClick={() => window.location.href=`/reports/requests/all/export?requestingUserId=${currentUser.id}&format=pdf`}
+          >
+            PDF
+          </button>
+        </div>
+      </div>
       
       {error && <div className="requests-tab-error">Error: {error}</div>}
       

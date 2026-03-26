@@ -4,6 +4,7 @@ import ZoomableImage from './ZoomableImage'
 import LazyItem from './LazyItem'
 import LazyTbody from './LazyTbody'
 import './RoomsTab.css'
+import { sanitizeInput } from '../utils/sanitizer'
 
 const TYPE_NAMES = {
   1: 'laptop',
@@ -396,7 +397,7 @@ function RoomCard({ room, index, isExpanded, onToggle, expandedEquipmentIds, onT
               autoFocus
               className="room-rename-input" 
               value={editName}
-              onChange={(e) => setEditName(e.target.value)}
+              onChange={(e) => setEditName(sanitizeInput(e.target.value))}
               onBlur={() => setIsRenaming(false)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleRoomRename()
@@ -628,7 +629,7 @@ export default function RoomsTab({ user, refreshTrigger }) {
             type="text" 
             placeholder="new room name..." 
             value={newRoomName}
-            onChange={(e) => setNewRoomName(e.target.value)}
+            onChange={(e) => setNewRoomName(sanitizeInput(e.target.value))}
             className="add-room-input"
             required
           />

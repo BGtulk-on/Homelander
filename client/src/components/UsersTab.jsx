@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useLayoutEffect } from 'react'
 import gsap from 'gsap'
 import LazyItem from './LazyItem'
 import './UsersTab.css'
+import { sanitizeInput } from '../utils/sanitizer'
 
 function ActionConfirmBtn({ actionText, confirmText, onClick, disabled }) {
   const [isConfirming, setIsConfirming] = useState(false)
@@ -404,7 +405,7 @@ export default function UsersTab({ currentUser }) {
           className="users-tab-search"
           placeholder="search users"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => setSearchQuery(sanitizeInput(e.target.value))}
         />
       </div>
 

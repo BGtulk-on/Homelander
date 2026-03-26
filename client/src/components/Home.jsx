@@ -36,7 +36,7 @@ export default function Home({ user, onLogout }) {
         return <RequestsTab currentUser={user} />
       case 'equipment':
       default:
-        return <EquipmentTab onEquipmentChange={handleEquipmentChange} />
+        return <EquipmentTab onEquipmentChange={handleEquipmentChange} currentUser={user} />
     }
   }
 
