@@ -3,19 +3,18 @@ package com.uktc.schoolInventory.controllers;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import com.uktc.schoolInventory.controllers.user.Role;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.uktc.schoolInventory.models.User;
-import com.uktc.schoolInventory.repositories.UserRepository;
 import com.uktc.schoolInventory.services.ReportService;
 
 @RestController
@@ -23,12 +22,10 @@ import com.uktc.schoolInventory.services.ReportService;
 public class ReportController {
 
     private final ReportService reportService;
-    private final UserRepository userRepository;
     private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
 
-    public ReportController(ReportService reportService, UserRepository userRepository) {
+    public ReportController(ReportService reportService) {
         this.reportService = reportService;
-        this.userRepository = userRepository;
     }
 
     /**
@@ -54,9 +51,9 @@ public class ReportController {
     @GetMapping("/user/{userId}/export")
     public ResponseEntity<?> exportUserReport(
             @PathVariable Long userId,
-            @RequestParam Long requestingUserId,
-            @RequestParam(defaultValue = "csv") String format) {
-        if (!isAdmin(requestingUserId)) {
+            @RequestParam(defaultValue = "csv") String format,
+            Authentication authentication) {
+        if (!isAdmin(authentication)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only admins can access other users' reports");
         }
         try {
@@ -73,9 +70,9 @@ public class ReportController {
      */
     @GetMapping("/equipment/all/export")
     public ResponseEntity<?> exportAllEquipmentReport(
-            @RequestParam Long requestingUserId,
-            @RequestParam(defaultValue = "csv") String format) {
-        if (!isAdmin(requestingUserId)) {
+            @RequestParam(defaultValue = "csv") String format,
+            Authentication authentication) {
+        if (!isAdmin(authentication)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only admins can access equipment reports");
         }
         try {
@@ -92,9 +89,9 @@ public class ReportController {
      */
     @GetMapping("/requests/all/export")
     public ResponseEntity<?> exportAllRequestsReport(
-            @RequestParam Long requestingUserId,
-            @RequestParam(defaultValue = "csv") String format) {
-        if (!isAdmin(requestingUserId)) {
+            @RequestParam(defaultValue = "csv") String format,
+            Authentication authentication) {
+        if (!isAdmin(authentication)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only admins can access request reports");
         }
         try {
@@ -112,9 +109,9 @@ public class ReportController {
     @GetMapping("/equipment/{equipmentId}/export")
     public ResponseEntity<?> exportEquipmentReport(
             @PathVariable Long equipmentId,
-            @RequestParam Long requestingUserId,
-            @RequestParam(defaultValue = "csv") String format) {
-        if (!isAdmin(requestingUserId)) {
+            @RequestParam(defaultValue = "csv") String format,
+            Authentication authentication) {
+        if (!isAdmin(authentication)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only admins can access equipment reports");
         }
         try {
@@ -127,10 +124,10 @@ public class ReportController {
 
     // ==================== Helpers ====================
 
-    private boolean isAdmin(Long userId) {
-        return userRepository.findById(userId)
-                .map(user -> user.getRole() == Role.ADMIN || user.getRole() == Role.SUPERUSER)
-                .orElse(false);
+    private boolean isAdmin(Authentication authentication) {
+        return authentication != null && authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(a -> a.equals("ROLE_ADMIN") || a.equals("ROLE_SUPERUSER"));
     }
 
     private ResponseEntity<byte[]> buildUserFileResponse(Long userId, String format, String prefix) throws Exception {

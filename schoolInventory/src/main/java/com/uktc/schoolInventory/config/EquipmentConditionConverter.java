@@ -13,7 +13,7 @@ public class EquipmentConditionConverter implements AttributeConverter<Equipment
         return switch (condition) {
             case POOR -> "POOR";
             case GOOD -> "GOOD";
-            case VERY_GOOD -> "VERY_GOOD";
+            case VERY_GOOD -> "VERY GOOD";
             case EXCELLENT -> "EXCELLENT";
         };
     }
@@ -24,7 +24,7 @@ public class EquipmentConditionConverter implements AttributeConverter<Equipment
         return switch (dbValue) {
             case "POOR" -> EquipmentCondition.POOR;
             case "GOOD" -> EquipmentCondition.GOOD;
-            case "VERY_GOOD" -> EquipmentCondition.VERY_GOOD;
+            case "VERY GOOD" -> EquipmentCondition.VERY_GOOD;
             case "EXCELLENT" -> EquipmentCondition.EXCELLENT;
             default -> throw new IllegalArgumentException("Unknown equipment condition: " + dbValue);
         };

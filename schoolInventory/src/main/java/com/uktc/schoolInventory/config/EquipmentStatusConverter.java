@@ -12,8 +12,8 @@ public class EquipmentStatusConverter implements AttributeConverter<EquipmentSta
         if (status == null) return null;
         return switch (status) {
             case Available -> "Available";
-            case CheckedOut -> "Checked_Out";
-            case UnderRepair -> "Under_Repair";
+            case CheckedOut -> "Checked Out";
+            case UnderRepair -> "Under Repair";
             case Retired -> "Retired";
         };
     }
@@ -23,8 +23,8 @@ public class EquipmentStatusConverter implements AttributeConverter<EquipmentSta
         if (dbValue == null) return null;
         return switch (dbValue) {
             case "Available" -> EquipmentStatus.Available;
-            case "Checked_Out" -> EquipmentStatus.CheckedOut;
-            case "Under_Repair" -> EquipmentStatus.UnderRepair;
+            case "Checked Out" -> EquipmentStatus.CheckedOut;
+            case "Under Repair" -> EquipmentStatus.UnderRepair;
             case "Retired" -> EquipmentStatus.Retired;
             default -> throw new IllegalArgumentException("Unknown equipment status: " + dbValue);
         };
