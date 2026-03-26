@@ -79,6 +79,26 @@ public class GlobalExceptionHandler {
                 ));
     }
 
+    @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(
+            org.springframework.security.core.AuthenticationException ex, HttpServletRequest request) {
+        String message = "Authentication failed";
+        if (ex instanceof org.springframework.security.authentication.DisabledException) {
+            message = "Your account is not approved yet. Please wait for an administrator to approve it.";
+        } else if (ex instanceof org.springframework.security.authentication.BadCredentialsException) {
+            message = "Invalid email or password";
+        }
+        
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponse(
+                        HttpStatus.UNAUTHORIZED.value(),
+                        "Unauthorized",
+                        message,
+                        request.getRequestURI()
+                ));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneral(
             Exception ex, HttpServletRequest request) {
