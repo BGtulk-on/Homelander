@@ -24,8 +24,8 @@ public class SessionUserFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         String path = request.getRequestURI();
         logger.info("SessionUserFilter: path={} sessionId={}", path, (request.getSession(false) != null ? request.getSession(false).getId() : "none"));
-        // Allow unauthenticated access to login and register endpoints
-        if (path.equals("/api/auth/register") || path.equals("/api/auth/login")) {
+        // Allow unauthenticated access to login, register and session check endpoints
+        if (path.equals("/api/auth/register") || path.equals("/api/auth/login") || path.equals("/api/auth/me")) {
             logger.info("Allowing unauthenticated access to {}", path);
             filterChain.doFilter(request, response);
             return;
