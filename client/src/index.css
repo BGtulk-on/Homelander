@@ -43,6 +43,25 @@ body {
   transform-origin: center center;
 }
 
+@media (max-width: 768px) {
+  .shared-divider {
+    width: 80vw;
+    height: 2px;
+    top: 0;
+    position: relative;
+    margin: 0 auto;
+    left: 0;
+    transform: none;
+    flex-shrink: 0;
+  }
+  
+  .app-container {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+}
+
 .logo {
   font-weight: 600;
   font-size: 1.25rem;

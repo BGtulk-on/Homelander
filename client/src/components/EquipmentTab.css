@@ -421,3 +421,35 @@
   color: #A0430A;
   font-weight: 500;
 }
+
+@media (max-width: 768px) {
+  .equip-tab-container {
+    padding: 0 0.5rem;
+  }
+
+  .equip-tab-search {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .equip-tab-name {
+    font-size: 1rem;
+  }
+
+  .equip-info-grid {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+
+  .equip-photo-preview {
+    height: 180px;
+  }
+
+  .equip-tab-item-header {
+    padding: 0.7rem 1rem;
+  }
+
+  .equip-tab-item-box:first-child { border-top-left-radius: 12px; border-top-right-radius: 12px; }
+  .equip-tab-item-box:last-child { border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
+  .equip-tab-item-box:first-child:last-child { border-radius: 12px; }
+}

@@ -40,6 +40,7 @@ public class SessionUserFilter extends OncePerRequestFilter {
         }
         logger.warn("Blocking request: not authenticated");
         // Otherwise, block
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "No logged user in session");
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.getWriter().write("No logged user in session");
     }
 }

@@ -23,18 +23,34 @@ export default function AccessGate({ onLogin, isExiting }) {
 
   useEffect(() => {
     if (isExiting) {
-      gsap.to(leftSectionRef.current, {
-        x: '-100%',
-        opacity: 0,
-        duration: 0.8,
-        ease: 'power3.in'
-      })
-      gsap.to(rightSectionRef.current, {
-        x: '100%',
-        opacity: 0,
-        duration: 0.8,
-        ease: 'power3.in'
-      })
+      const isMobile = window.innerWidth <= 768
+      if (isMobile) {
+        gsap.to(leftSectionRef.current, {
+          y: '-100%',
+          opacity: 0,
+          duration: 0.8,
+          ease: 'power3.in'
+        })
+        gsap.to(rightSectionRef.current, {
+          y: '100%',
+          opacity: 0,
+          duration: 0.8,
+          ease: 'power3.in'
+        })
+      } else {
+        gsap.to(leftSectionRef.current, {
+          x: '-100%',
+          opacity: 0,
+          duration: 0.8,
+          ease: 'power3.in'
+        })
+        gsap.to(rightSectionRef.current, {
+          x: '100%',
+          opacity: 0,
+          duration: 0.8,
+          ease: 'power3.in'
+        })
+      }
     }
   }, [isExiting])
 

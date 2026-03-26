@@ -1,6 +1,5 @@
 package com.uktc.schoolInventory.dto;
 
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -31,7 +30,10 @@ public class UserRegisterDto {
     private String email;
 
     @NotBlank(message = "Password is required")
-    @Size(min = 6, max = 100, message = "Password must be between 6 and 100 characters")
-    @Pattern(regexp = "^[^<>&\"']*$", message = "Password contains invalid characters")
+    @Size(min = 8, max = 100, message = "Password must be at least 8 characters")
+    @Pattern(
+            regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$",
+            message = "Password must contain at least one digit, one lowercase, one uppercase, and one special character"
+    )
     private String password;
 }

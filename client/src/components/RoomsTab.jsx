@@ -476,7 +476,7 @@ function RoomCard({ room, index, isExpanded, onToggle, expandedEquipmentIds, onT
   )
 }
 
-export default function RoomsTab({ user, refreshTrigger }) {
+export default function RoomsTab({ user, refreshTrigger, onRoomChange }) {
   const [rooms, setRooms] = useState([])
   const [userRequests, setUserRequests] = useState([])
   const [expandedRoomId, setExpandedRoomId] = useState(null)
@@ -496,6 +496,7 @@ export default function RoomsTab({ user, refreshTrigger }) {
       } else if (hint_isUpdate && hint_payload) {
         setRooms(prev => prev.map(r => r.id === hint_payload.id ? { ...r, name: hint_payload.roomName } : r))
       }
+      if (onRoomChange) onRoomChange()
       return
     }
 
@@ -568,6 +569,7 @@ export default function RoomsTab({ user, refreshTrigger }) {
       
       setRooms(prev => [...prev, newRoom])
       setNewRoomName('')
+      if (onRoomChange) onRoomChange()
     } catch (err) {
       console.error(err)
     } finally {

@@ -38,12 +38,30 @@ function App() {
   useLayoutEffect(() => {
     if (appPhase === 'HOME' && user && dividerRef.current) {
       const isAdmin = user.role === 'ADMIN' || user.role === 'SUPERUSER'
+      const isMobile = window.innerWidth <= 768
+      
       if (isAdmin) {
-        gsap.set(dividerRef.current, {
-          height: '100%',
-          left: '20%',
-          opacity: 1
-        })
+        if (isMobile) {
+          gsap.set(dividerRef.current, {
+            width: '100%',
+            height: '2px',
+            top: '0%',
+            left: '0%',
+            transform: 'none',
+            position: 'absolute',
+            opacity: 1
+          })
+        } else {
+          gsap.set(dividerRef.current, {
+            width: '2px',
+            height: '100%',
+            left: '20%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            position: 'absolute',
+            opacity: 1
+          })
+        }
       } else {
         gsap.set(dividerRef.current, {
           opacity: 0
@@ -74,6 +92,8 @@ function App() {
   const handleLogin = (userData) => {
     // New role-based check from the last backend commits
     const isAdmin = userData.role === 'ADMIN' || userData.role === 'SUPERUSER'
+    const isMobile = window.innerWidth <= 768
+
     if (isAdmin) {
       setIsTransitioning(true)
       setAppPhase('TRANSITION')
@@ -86,16 +106,32 @@ function App() {
         }
       })
 
-      tl.to(dividerRef.current, {
-        height: '100%',
-        duration: 0.8,
-        ease: 'power3.inOut'
-      })
-      .to(dividerRef.current, {
-        left: '20%',
-        duration: 1,
-        ease: 'power4.inOut'
-      }, '-=0.2')
+      if (isMobile) {
+        tl.to(dividerRef.current, {
+          width: '100%',
+          duration: 0.8,
+          ease: 'power3.inOut'
+        })
+        .to(dividerRef.current, {
+          top: '0%',
+          left: '0%',
+          transform: 'none',
+          position: 'absolute',
+          duration: 1,
+          ease: 'power4.inOut'
+        }, '-=0.2')
+      } else {
+        tl.to(dividerRef.current, {
+          height: '100%',
+          duration: 0.8,
+          ease: 'power3.inOut'
+        })
+        .to(dividerRef.current, {
+          left: '20%',
+          duration: 1,
+          ease: 'power4.inOut'
+        }, '-=0.2')
+      }
     } else {
       setIsTransitioning(true)
       setAppPhase('TRANSITION')
@@ -121,7 +157,47 @@ function App() {
     }
     setUser(null)
     setAppPhase('GATE')
-    gsap.set(dividerRef.current, { height: '60vh', left: '50%', opacity: 1 })
+    
+    const isMobile = window.innerWidth <= 768
+    if (isMobile) {
+      gsap.set(dividerRef.current, { 
+        width: '80vw', 
+        height: '2px', 
+        top: '0', 
+        left: '0', 
+        margin: '0 auto',
+        position: 'relative',
+        transform: 'none',
+        opacity: 1,
+        clearProps: 'all' 
+      })
+      gsap.set(dividerRef.current, { 
+        width: '80vw', 
+        height: '2px', 
+        top: '0', 
+        position: 'relative',
+        margin: '0 auto',
+        left: '0',
+        transform: 'none',
+        opacity: 1 
+      })
+    } else {
+      gsap.set(dividerRef.current, { 
+        width: '2px',
+        height: '60vh', 
+        left: '50%', 
+        top: '50%',
+        opacity: 1,
+        clearProps: 'all'
+      })
+      gsap.set(dividerRef.current, { 
+        width: '2px',
+        height: '60vh', 
+        left: '50%', 
+        top: '50%',
+        opacity: 1 
+      })
+    }
   }
 
   return (

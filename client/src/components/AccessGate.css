@@ -106,3 +106,38 @@
 .gate-mode-switch:hover {
   color: var(--accent-color);
 }
+
+@media (max-width: 768px) {
+  .gate-wrapper {
+    flex-direction: column;
+  }
+  
+  .gate-blank-section {
+    padding-right: 0;
+    justify-content: center;
+    align-items: center;
+    height: 45vh;
+    width: 100%;
+  }
+
+  .gate-form-section {
+    padding-left: 0;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 55vh;
+    height: auto;
+    width: 100%;
+    padding-bottom: 3rem;
+  }
+
+  .gate-form-content {
+    padding-left: 0;
+    max-width: 85%;
+    margin: 0 auto;
+  }
+
+  .gate-title {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+}

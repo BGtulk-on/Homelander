@@ -149,30 +149,47 @@ function Laptop({ isTyping, activeInputValue, activeInputType, activeFieldIndex,
 export default function LaptopModel({ isTyping, activeInputValue, activeInputType, activeFieldIndex }) {
   const wrapperRef = useRef(null)
   const [modelReady, setModelReady] = useState(false)
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   const handleReady = useCallback(() => setModelReady(true), [])
 
   useEffect(() => {
     if (!modelReady || !wrapperRef.current) return
     import('gsap').then(({ gsap }) => {
+      const isMob = window.innerWidth <= 768
       gsap.fromTo(wrapperRef.current,
-        { x: '-100%', opacity: 0 },
-        { x: '0%', opacity: 1, duration: 1.2, ease: 'power3.out' }
+        { [isMob ? 'y' : 'x']: '-100%', opacity: 0 },
+        { [isMob ? 'y' : 'x']: '0%', opacity: 1, duration: 1.2, ease: 'power3.out' }
       )
     })
   }, [modelReady])
 
+  const size = isMobile ? 320 : 500
+
   return (
     <div
       ref={wrapperRef}
-      style={{ position: 'relative', width: '500px', height: '500px', zIndex: 1, pointerEvents: 'none', opacity: 0 }}
+      style={{ 
+        position: 'relative', 
+        width: `${size}px`, 
+        height: `${size}px`, 
+        zIndex: 1, 
+        pointerEvents: 'none', 
+        opacity: 0 
+      }}
     >
       <Canvas camera={{ position: [0, 2.0, 6.5], fov: 45 }}>
         <ambientLight intensity={0.6} />
         <directionalLight position={[5, 10, 5]} intensity={1.5} />
         <Environment preset="city" />
         
-        <group rotation={[0.2, 0.8, 0]}>
+        <group rotation={[0.2, 0.8, 0]} scale={isMobile ? 0.8 : 1}>
           <Laptop isTyping={isTyping} activeInputValue={activeInputValue} activeInputType={activeInputType} activeFieldIndex={activeFieldIndex} onReady={handleReady} />
         </group>
       </Canvas>

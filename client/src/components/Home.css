@@ -187,9 +187,31 @@
   margin: 0 -4rem 0 -4rem;
 }
 
+.mobile-admin-active-title {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-admin-active-title {
+    display: block;
+    position: fixed;
+    top: 1.5rem;
+    left: 1.5rem;
+    z-index: 2100;
+    font-size: 2.2rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--burnt-copper);
+    pointer-events: none;
+    letter-spacing: -0.02em;
+  }
+}
+
 .home-profile-card {
-  position: relative;
-  z-index: 100;
+  position: absolute;
+  top: 4rem;
+  right: 4rem;
+  z-index: 2000;
   width: 44px;
   height: 44px;
   border-radius: 50%;
@@ -204,6 +226,14 @@
   box-shadow: 0 4px 15px rgba(160, 67, 10, 0.1);
   transition: transform 0.2s ease;
   flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .home-profile-card {
+    top: 1.5rem;
+    right: 1.5rem;
+    transform-origin: right top;
+  }
 }
 
 .rooms-title {
@@ -296,4 +326,76 @@
 .profile-logout-btn svg {
   width: 16px;
   height: 16px;
+}
+
+.mobile-only-admin-btn {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .mobile-only-admin-btn {
+    display: flex !important;
+  }
+
+  .home-sidebar {
+    display: none;
+  }
+
+  .mobile-admin-active .home-sidebar {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1500;
+    background-color: var(--sea-mist);
+    padding: 5rem 0 0 0;
+  }
+  
+  .mobile-admin-active .home-sidebar .home-sidebar-content {
+    overflow-y: auto;
+    padding: 0 1rem;
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+
+  .mobile-admin-active .home-sidebar .home-nav-bottom {
+    padding: 1rem 0 2rem 0;
+    border-top: 1px solid rgba(160, 67, 10, 0.1);
+  }
+
+  .mobile-admin-active .home-sidebar .home-nav-icon-btn {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .mobile-admin-active .home-dashboard-area {
+    display: none;
+  }
+
+  .home-dashboard-area {
+    padding: 0 1.5rem 2rem 1.5rem;
+  }
+
+  .dashboard-sticky-header {
+    padding: 1.5rem 1.5rem 0.5rem 1.5rem;
+    margin: 0 -1.5rem 0 -1.5rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .rooms-title {
+    font-size: 3.5rem;
+    margin-bottom: 0 !important;
+    order: 1;
+    line-height: 1;
+  }
+
+  .profile-menu-content {
+    padding-top: 2.5rem;
+  }
 }

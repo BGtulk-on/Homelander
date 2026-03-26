@@ -288,3 +288,35 @@
   color: #A0430A;
   font-weight: 500;
 }
+
+@media (max-width: 768px) {
+  .requests-tab-title-wrapper {
+    display: none;
+  }
+
+  .requests-tab-container {
+    padding: 0 0.5rem;
+  }
+...
+  .requests-tab-title {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .requests-tab-username {
+    font-size: 1rem;
+  }
+
+  .requests-info-grid {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+
+  .requests-tab-item-header {
+    padding: 0.7rem 1rem;
+  }
+
+  .requests-tab-item-box:first-child { border-top-left-radius: 12px; border-top-right-radius: 12px; }
+  .requests-tab-item-box:last-child { border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
+  .requests-tab-item-box:first-child:last-child { border-radius: 12px; }
+}

@@ -221,3 +221,31 @@
   padding: 0.3rem 0.6rem;
   border-style: dashed;
 }
+
+@media (max-width: 768px) {
+  .users-tab-container {
+    padding: 0 0.5rem;
+  }
+
+  .users-tab-search {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .users-tab-username {
+    font-size: 1rem;
+  }
+
+  .users-info-grid {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+
+  .users-tab-item-header {
+    padding: 0.7rem 1rem;
+  }
+
+  .users-tab-item-box:first-child { border-top-left-radius: 12px; border-top-right-radius: 12px; }
+  .users-tab-item-box:last-child { border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
+  .users-tab-item-box:first-child:last-child { border-radius: 12px; }
+}

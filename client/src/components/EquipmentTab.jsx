@@ -433,7 +433,7 @@ function EquipmentItem({ item, index, isExpanded, onToggle, onDelete, onUpdate, 
   )
 }
 
-export default function EquipmentTab({ onEquipmentChange, currentUser }) {
+export default function EquipmentTab({ onEquipmentChange, refreshTrigger, currentUser }) {
   const [equipment, setEquipment] = useState([])
   const [users, setUsers] = useState([])
   const [locations, setLocations] = useState([])
@@ -484,7 +484,7 @@ export default function EquipmentTab({ onEquipmentChange, currentUser }) {
       fetchData(searchQuery)
     }, 400)
     return () => clearTimeout(timer)
-  }, [searchQuery])
+  }, [searchQuery, refreshTrigger])
 
   useLayoutEffect(() => {
     if (formRef.current) {
