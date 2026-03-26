@@ -38,6 +38,7 @@ public class AuthController {
 
         UserDto authendicatedUser = authService.authenticate(userLoginDto);
 
+        session.setAttribute("userId", authendicatedUser.getId());
         session.setAttribute("userEmail",authendicatedUser.getEmail());
         session.setAttribute("userRole",authendicatedUser.getRole());
 
@@ -72,4 +73,16 @@ public class AuthController {
         return ResponseEntity.ok("logout successful");
     }
 
+    @org.springframework.web.bind.annotation.GetMapping("/me")
+    public ResponseEntity<LoginResponse> getCurrentUser(HttpSession session) {
+        String email = (String) session.getAttribute("userEmail");
+        com.uktc.schoolInventory.controllers.user.Role role = (com.uktc.schoolInventory.controllers.user.Role) session.getAttribute("userRole");
+        
+        Long id = (Long) session.getAttribute("userId");
+
+        if (email != null && role != null && id != null) {
+            return ResponseEntity.ok(new LoginResponse(id, email, role));
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
 }

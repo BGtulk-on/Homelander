@@ -9,6 +9,51 @@ function App() {
   const [isTransitioning, setIsTransitioning] = useState(false)
   const dividerRef = useRef(null)
   const [appPhase, setAppPhase] = useState('GATE')
+  const [isInitialLoading, setIsInitialLoading] = useState(true)
+
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const res = await fetch('/api/auth/me')
+        if (res.ok) {
+          const userData = await res.json()
+          setUser(userData)
+          
+          const isAdmin = userData.role === 'ADMIN' || userData.role === 'SUPERUSER'
+          if (isAdmin) {
+            gsap.set(dividerRef.current, {
+              height: '100%',
+              left: '20%',
+              opacity: 1
+            })
+          } else {
+            gsap.set(dividerRef.current, {
+              opacity: 0
+            })
+          }
+          
+          setAppPhase('HOME')
+        }
+      } catch (err) {
+        console.error('Session check failed:', err)
+      } finally {
+        setIsInitialLoading(false)
+      }
+    }
+    checkSession()
+  }, [])
+
+  if (isInitialLoading) {
+    return <div style={{ 
+      background: '#DFE8E6', 
+      height: '100vh', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      color: '#A0430A',
+      fontFamily: 'Clash Grotesk, sans-serif'
+    }}>LOADING...</div>
+  }
 
   const handleLogin = (userData) => {
     // New role-based check from the last backend commits
