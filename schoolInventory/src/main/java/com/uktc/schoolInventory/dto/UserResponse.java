@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.OffsetDateTime;
 
 @Data
-public class UserResponse {
+public class  UserResponse {
     private Long id;
     private String firstName;
     private String lastName;

@@ -1,4 +1,5 @@
 package com.uktc.schoolInventory.config;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,12 +13,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    @Autowired
-    private CustomLoginSuccessHandler successHandler;
     @Autowired
     private SessionUserFilter sessionUserFilter;
     @Bean
@@ -25,14 +26,17 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+                        .requestMatchers("/auth/register", "/auth/login").permitAll()
                         .anyRequest().authenticated()
                 )
-//                .httpBasic(withDefaults())
-                .formLogin(form -> form
-                        .successHandler(successHandler) // Слагаме нашия нов Handler тук
-                        .permitAll()
+
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.getWriter().write("{\"error\": \"Unauthorized\"}");
+                        })
                 )
+
                 .addFilterAfter(sessionUserFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session
                         .maximumSessions(1)

@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -25,7 +26,7 @@ public class SessionUserFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         logger.info("SessionUserFilter: path={} sessionId={}", path, (request.getSession(false) != null ? request.getSession(false).getId() : "none"));
         // Allow unauthenticated access to login and register endpoints
-        if (path.equals("/api/auth/register") || path.equals("/api/auth/login")) {
+        if (path.equals("/auth/register") || path.equals("/auth/login")) {
             logger.info("Allowing unauthenticated access to {}", path);
             filterChain.doFilter(request, response);
             return;
@@ -38,6 +39,18 @@ public class SessionUserFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+
+        // Also check for manual session attributes set by AuthController
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            String userEmail = (String) session.getAttribute("userEmail");
+            if (userEmail != null) {
+                logger.info("Allowing access for user with session attribute: {}", userEmail);
+                filterChain.doFilter(request, response);
+                return;
+            }
+        }
+
         logger.warn("Blocking request: not authenticated");
         // Otherwise, block
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "No logged user in session");
