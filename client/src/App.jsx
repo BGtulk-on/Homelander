@@ -1,9 +1,8 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useLayoutEffect } from 'react'
 import gsap from 'gsap'
 import AccessGate from './components/AccessGate'
 import Home from './components/Home'
 import './index.css'
-
 function App() {
   const [user, setUser] = useState(null)
   const [isTransitioning, setIsTransitioning] = useState(false)
@@ -14,24 +13,14 @@ function App() {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const res = await fetch('/api/auth/me')
+        const minWait = new Promise(resolve => setTimeout(resolve, 400));
+        const fetchMe = fetch('/api/auth/me');
+
+        const [res] = await Promise.all([fetchMe, minWait]);
+
         if (res.ok) {
           const userData = await res.json()
           setUser(userData)
-          
-          const isAdmin = userData.role === 'ADMIN' || userData.role === 'SUPERUSER'
-          if (isAdmin) {
-            gsap.set(dividerRef.current, {
-              height: '100%',
-              left: '20%',
-              opacity: 1
-            })
-          } else {
-            gsap.set(dividerRef.current, {
-              opacity: 0
-            })
-          }
-          
           setAppPhase('HOME')
         }
       } catch (err) {
@@ -43,16 +32,40 @@ function App() {
     checkSession()
   }, [])
 
+  useLayoutEffect(() => {
+    if (appPhase === 'HOME' && user && dividerRef.current) {
+      const isAdmin = user.role === 'ADMIN' || user.role === 'SUPERUSER'
+      if (isAdmin) {
+        gsap.set(dividerRef.current, {
+          height: '100%',
+          left: '20%',
+          opacity: 1
+        })
+      } else {
+        gsap.set(dividerRef.current, {
+          opacity: 0
+        })
+      }
+    }
+  }, [appPhase, user])
+
   if (isInitialLoading) {
-    return <div style={{ 
-      background: '#DFE8E6', 
-      height: '100vh', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center',
-      color: '#A0430A',
-      fontFamily: 'Clash Grotesk, sans-serif'
-    }}>LOADING...</div>
+    return (
+      <main className="app-container phase-GATE" style={{ opacity: 1 }}>
+        <div className="shared-divider" style={{ height: '60vh', left: '50%', opacity: 0.1 }}></div>
+        <div style={{ 
+          height: '100vh', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          color: '#A0430A',
+          fontFamily: 'Clash Grotesk, sans-serif',
+          letterSpacing: '4px',
+          fontSize: '0.8rem',
+          opacity: 0.6
+        }}>INITIALIZING...</div>
+      </main>
+    )
   }
 
   const handleLogin = (userData) => {
